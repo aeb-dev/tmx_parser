@@ -1,0 +1,13 @@
+name: tmx_parser
+version: 0.1.0
+description: Tiled .tmx file parser
+homepage: https://github.com/MrMuMu/tmx_parser
+
+dependencies:
+  xml: ^4.2.0
+
+dev_dependencies:
+  test: any
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"

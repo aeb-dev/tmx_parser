@@ -1,0 +1,12 @@
+/packages
+/build
+
+/.pub
+pubspec.lock
+
+# IDEs
+/.idea
+
+.packages
+.dart_tool
+.vscode/
