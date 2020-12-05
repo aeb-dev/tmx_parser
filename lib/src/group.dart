@@ -39,18 +39,22 @@ class Group {
         case "layer":
           final Layer layer = Layer.fromXML(childElement);
           layers.add(layer);
+          renderOrderedLayers.add(layer);
           break;
         case "objectgroup":
           final ObjectGroup objectGroup = ObjectGroup.fromXML(childElement);
           objectGroups[objectGroup.name] = objectGroup;
+          renderOrderedLayers.add(objectGroups);
           break;
         case "imagelayer":
           final ImageLayer imageLayer = ImageLayer.fromXML(childElement);
           imageLayers.add(imageLayer);
+          renderOrderedLayers.add(imageLayer);
           break;
         case "group":
           final Group group = Group.fromXML(childElement);
           groups.add(group);
+          renderOrderedLayers.add(group);
           break;
       }
     });
