@@ -1,4 +1,6 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'wang_set.dart';
 
 class WangSets {
   WangSets._();

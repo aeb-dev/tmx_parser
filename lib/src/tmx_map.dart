@@ -1,4 +1,13 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
+import 'group.dart';
+import 'image_layer.dart';
+import 'layer.dart';
+import 'object_group.dart';
+import 'properties.dart';
+import 'tile.dart';
+import 'tile_set.dart';
 
 class TmxMap {
   String version;

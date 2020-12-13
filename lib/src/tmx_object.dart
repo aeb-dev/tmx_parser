@@ -1,4 +1,11 @@
-part of tmx_parser;
+import 'dart:math';
+
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
+import 'properties.dart';
+import 'property.dart';
+import 'text.dart';
 
 class TmxObject {
   int id;
@@ -6,7 +13,7 @@ class TmxObject {
   String type = "";
   double x = 0.0;
   double y = 0.0;
-  double widht = 0.0;
+  double width = 0.0;
   double height = 0.0;
   double rotation = 0.0; // in degrees, clockwise
   int gid;
@@ -29,7 +36,7 @@ class TmxObject {
     type = element.getAttributeStrOr("type", type);
     x = element.getAttributeDoubleOr("x", x);
     y = element.getAttributeDoubleOr("y", y);
-    widht = element.getAttributeDoubleOr("widht", widht);
+    width = element.getAttributeDoubleOr("width", width);
     height = element.getAttributeDoubleOr("height", height);
     rotation = element.getAttributeDoubleOr("rotation", rotation);
     gid = element.getAttributeIntOr("gid", gid);
@@ -41,20 +48,24 @@ class TmxObject {
           properties ??= Properties.fromXML(childElement);
           break;
         case "ellipse":
+          points = [Point(x, y), Point(x + (width / 2.0), y + (height / 2.0)), Point(x + width, y + height), Point(x - (width / 2.0), y - (height / 2.0))];
+          break;
         case "point":
+          points = [Point(x, y)];
+          break;
         case "polygon":
         case "polyline":
           objectType = childElement.name.local;
           points = childElement
               .getAttributeStrOr("points", null)
-              ?.split(" ")
-              ?.map((pointS) {
+              .split(" ")
+              .map((pointS) {
             final List<String> pointPairs = pointS.split(",");
             return Point(
               double.parse(pointPairs.first),
               double.parse(pointPairs.last),
             );
-          })?.toList();
+          }).toList();
           break;
         case "text":
           text ??= Text.fromXML(childElement);

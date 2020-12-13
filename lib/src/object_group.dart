@@ -1,4 +1,9 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
+import 'properties.dart';
+import 'property.dart';
+import 'tmx_object.dart';
 
 class ObjectGroup {
   int id;
@@ -12,7 +17,8 @@ class ObjectGroup {
   String drawOrder = "topdown";
 
   Map<String, Property> properties;
-  Map<String, TmxObject> objects = {};
+  Map<String, TmxObject> objectMapByName = {};
+  Map<int, TmxObject> objectMapById = {};
 
   ObjectGroup.fromXML(XmlElement element) {
     if (element.name.local != "objectgroup") {
@@ -46,6 +52,9 @@ class ObjectGroup {
       objectList.sort((first, second) => first.y.compareTo(second.y));
     }
 
-    objectList.forEach((object) => objects[object.name] = object);
+    objectList.forEach((object) {
+      objectMapByName[object.name] = object;
+      objectMapById[object.id] = object;
+    });
   }
 }

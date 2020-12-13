@@ -1,4 +1,11 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
+import 'image_layer.dart';
+import 'layer.dart';
+import 'object_group.dart';
+import 'properties.dart';
+import 'property.dart';
 
 class Group {
   int id;

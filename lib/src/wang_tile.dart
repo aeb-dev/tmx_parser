@@ -1,4 +1,8 @@
-part of tmx_parser;
+import 'dart:ffi';
+
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
 
 class WangTile {
   int tileId;

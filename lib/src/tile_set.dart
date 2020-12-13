@@ -1,4 +1,20 @@
-part of tmx_parser;
+import 'dart:io';
+
+import 'package:xml/xml.dart';
+
+import 'enums/object_alignment.dart';
+import 'extensions/string.dart';
+import 'extensions/xml_element.dart';
+import 'grid.dart';
+import 'properties.dart';
+import 'property.dart';
+import 'terrain.dart';
+import 'terrain_types.dart';
+import 'tile.dart';
+import 'tile_offset.dart';
+import 'tmx_image.dart';
+import 'wang_set.dart';
+import 'wang_sets.dart';
 
 class TileSet {
   int firstgid;
@@ -74,16 +90,4 @@ class TileSet {
       }
     });
   }
-}
-
-enum ObjectAlignment {
-  bottomLeft,
-  bottomRight,
-  bottom,
-  topLeft,
-  topRight,
-  top,
-  left,
-  center,
-  right,
 }

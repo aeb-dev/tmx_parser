@@ -1,4 +1,9 @@
-part of tmx_parser;
+import 'dart:typed_data';
+
+import 'package:xml/xml.dart';
+
+import 'data.dart';
+import 'extensions/xml_element.dart';
 
 class TmxImage {
   String format;

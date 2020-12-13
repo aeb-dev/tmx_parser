@@ -1,4 +1,12 @@
-part of tmx_parser;
+import 'dart:typed_data';
+
+import 'package:xml/xml.dart';
+
+import 'data.dart';
+import 'extensions/xml_element.dart';
+import 'flips.dart';
+import 'properties.dart';
+import 'property.dart';
 
 class Layer {
   static const int FLIPPED_HORIZONTALLY_FLAG = 0x80000000;

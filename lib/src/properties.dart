@@ -1,4 +1,6 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'property.dart';
 
 class Properties {
   Properties._();

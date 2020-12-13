@@ -1,21 +1,6 @@
-part of tmx_parser;
+import 'dart:ffi';
 
-extension XmlElementExtensions on XmlElement {
-  String getAttributeStrOr(String attrName, String defaultValue) =>
-      this.getAttribute(attrName) ?? defaultValue;
-
-  int getAttributeIntOr(String attrName, int defaultValue) =>
-      this.getAttribute(attrName)?.toInt() ?? defaultValue;
-
-  double getAttributeDoubleOr(String attrName, double defaultValue) =>
-      this.getAttribute(attrName)?.toDouble() ?? defaultValue;
-
-  Uint32 getAttributeUintOr(String attrName, Uint32 defaultValue) =>
-      this.getAttribute(attrName)?.toUint() ?? defaultValue;
-
-  bool getAttributeBoolOr(String attrName, bool defaultValue) =>
-      this.getAttribute(attrName)?.toBool() ?? defaultValue;
-}
+import '../enums/object_alignment.dart';
 
 extension StringExtensions on String {
   int toInt() => int.parse(this);

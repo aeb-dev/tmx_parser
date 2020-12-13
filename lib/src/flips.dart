@@ -1,5 +1,3 @@
-part of tmx_parser;
-
 class Flips {
   final bool horizontally;
   final bool vertically;

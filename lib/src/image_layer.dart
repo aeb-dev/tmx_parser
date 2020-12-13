@@ -1,4 +1,9 @@
-part of tmx_parser;
+import 'package:xml/xml.dart';
+
+import 'extensions/xml_element.dart';
+import 'properties.dart';
+import 'property.dart';
+import 'tmx_image.dart';
 
 class ImageLayer {
   int id;

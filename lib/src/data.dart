@@ -1,4 +1,8 @@
-part of tmx_parser;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:xml/xml.dart';
 
 class Data {
   static Uint8List fromXML(XmlElement element) {
