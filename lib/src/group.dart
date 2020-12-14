@@ -51,7 +51,7 @@ class Group {
         case "objectgroup":
           final ObjectGroup objectGroup = ObjectGroup.fromXML(childElement);
           objectGroups[objectGroup.name] = objectGroup;
-          renderOrderedLayers.add(objectGroups);
+          renderOrderedLayers.add(objectGroup);
           break;
         case "imagelayer":
           final ImageLayer imageLayer = ImageLayer.fromXML(childElement);
