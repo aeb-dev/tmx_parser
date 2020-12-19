@@ -42,35 +42,51 @@ class TmxObject {
     gid = element.getAttributeIntOr("gid", gid);
     visible = element.getAttributeBoolOr("visible", visible);
 
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "properties":
-          properties ??= Properties.fromXML(childElement);
-          break;
-        case "ellipse":
-          points = [Point(x, y), Point(x + (width / 2.0), y + (height / 2.0)), Point(x + width, y + height), Point(x - (width / 2.0), y - (height / 2.0))];
-          break;
-        case "point":
-          points = [Point(x, y)];
-          break;
-        case "polygon":
-        case "polyline":
-          objectType = childElement.name.local;
-          points = childElement
-              .getAttributeStrOr("points", null)
-              .split(" ")
-              .map((pointS) {
-            final List<String> pointPairs = pointS.split(",");
-            return Point(
-              double.parse(pointPairs.first),
-              double.parse(pointPairs.last),
-            );
-          }).toList();
-          break;
-        case "text":
-          text ??= Text.fromXML(childElement);
-          break;
-      }
-    });
+    element.children.whereType<XmlElement>().forEach(
+      (childElement) {
+        switch (childElement.name.local) {
+          case "properties":
+            properties ??= Properties.fromXML(childElement);
+            break;
+          case "ellipse":
+            points = [
+              Point(x, y),
+              Point(x + (width / 2.0), y + (height / 2.0)),
+              Point(x + width, y + height),
+              Point(x - (width / 2.0), y - (height / 2.0))
+            ];
+            break;
+          case "point":
+            points = [Point(x, y)];
+            break;
+          case "polygon":
+          case "polyline":
+            objectType = childElement.name.local;
+            points = childElement
+                .getAttributeStrOr("points", null)
+                .split(" ")
+                .map((pointS) {
+              final List<String> pointPairs = pointS.split(",");
+              return Point(
+                double.parse(pointPairs.first),
+                double.parse(pointPairs.last),
+              );
+            }).toList();
+            break;
+          case "text":
+            text ??= Text.fromXML(childElement);
+            break;
+        }
+      },
+    );
+
+    if (gid == null && points == null) {
+      points = [
+        Point(0.0, 0.0),
+        Point(0.0, height),
+        Point(width, height),
+        Point(width, 0.0),
+      ];
+    }
   }
 }
