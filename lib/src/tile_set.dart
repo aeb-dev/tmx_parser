@@ -17,7 +17,7 @@ import 'wang_set.dart';
 import 'wang_sets.dart';
 
 class TileSet {
-  int firstgid;
+  int firstGid;
   String source;
   String name;
   double tileWidth;
@@ -29,19 +29,19 @@ class TileSet {
   ObjectAlignment objectAlignment = ObjectAlignment.bottomLeft;
 
   TmxImage image;
-  TileOffset tileOffset;
+  TileOffset tileOffset = TileOffset.zero();
   Grid grid;
   Map<String, Property> properties;
   Map<String, Terrain> terrainTypes;
   Map<String, WangSet> wangSets;
-  List<Tile> tiles = [];
+  Map<int, Tile> tiles = {};
 
   TileSet.fromXML(XmlElement element) {
     if (element.name.local != "tileset") {
       throw "can not parse, element is not a 'tileset'";
     }
 
-    firstgid = element.getAttributeIntOr("firstgid", firstgid);
+    firstGid = element.getAttributeIntOr("firstgid", firstGid);
     source = element.getAttributeStrOr("source", source);
 
     final String sourceExtension = source?.split(".")?.last;
@@ -85,9 +85,20 @@ class TileSet {
           break;
         case "tile":
           final Tile tile = Tile.fromXML(childElement);
-          tiles.add(tile);
+          tiles[tile.id] = tile;
           break;
       }
     });
+  }
+
+  Tile getTileByGid(int gid) {
+    int tileIndex = gid - firstGid;
+    Tile tile = tiles[tileIndex];
+
+    return tile;
+  }
+
+  Tile getTileById(int id) {
+    return tiles[id];
   }
 }

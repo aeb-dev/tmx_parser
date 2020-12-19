@@ -44,7 +44,8 @@ class TmxMap {
     tiledVersion = element.getAttributeStrOr("tiledversion", tiledVersion);
     orientation = element.getAttributeStrOr("orientation", orientation);
     renderOrder = element.getAttributeStrOr("renderorder", renderOrder);
-    compressionLevel = element.getAttributeIntOr("compressionlevel", compressionLevel);
+    compressionLevel =
+        element.getAttributeIntOr("compressionlevel", compressionLevel);
     width = element.getAttributeDoubleOr("width", width);
     height = element.getAttributeDoubleOr("height", height);
     tileWidth = element.getAttributeDoubleOr("tilewidth", tileWidth);
@@ -52,7 +53,8 @@ class TmxMap {
     hexSideLength = element.getAttributeIntOr("hexsidelength", hexSideLength);
     staggerAxis = element.getAttributeStrOr("staggeraxis", staggerAxis);
     staggerIndex = element.getAttributeStrOr("staggerindex", staggerIndex);
-    backgroundColor = element.getAttributeStrOr("backgroundcolor", backgroundColor);
+    backgroundColor =
+        element.getAttributeStrOr("backgroundcolor", backgroundColor);
     infinite = element.getAttributeBoolOr("infinite", infinite);
 
     element.children.whereType<XmlElement>().forEach(
@@ -89,28 +91,13 @@ class TmxMap {
     );
   }
 
-  /// Retrieve a tile based on its GID
-  ///
-  /// GID is 1-based
-  /// From offical documentation:
-  /// In order to find out from which tileset the tile is you need to find the
-  /// tileset with the highest firstgid that is still lower or equal than the gid.
-  /// The tilesets are always stored with increasing firstgids.
-  /// A GID of 0 is always an "empty" tile
-  TileSet getTileSetByGID(int gid) {
+  TileSet getTileSetByGid(int gid) {
     final TileSet tileSet =
-        tileSets.values.lastWhere((tileset) => tileset.firstgid <= gid);
+        tileSets.values.lastWhere((tileset) => tileset.firstGid <= gid);
     return tileSet;
   }
 
-  // Returns a tileset based on its name
-  TileSet getTileset(String name) {
+  TileSet getTileSetByName(String name) {
     return tileSets[name];
-  }
-
-  /// Looks up a tile by its tileset and local tile id.
-  Tile getTileByLocalID(String tilesetName, int localTileId) {
-    final tileset = getTileset(tilesetName);
-    return tileset.tiles[localTileId];
   }
 }
