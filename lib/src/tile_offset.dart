@@ -14,4 +14,6 @@ class TileOffset {
     x = element.getAttributeDoubleOr("x", x);
     y = element.getAttributeDoubleOr("y", y);
   }
+
+  TileOffset.zero();
 }
