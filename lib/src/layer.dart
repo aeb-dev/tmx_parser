@@ -61,8 +61,8 @@ class Layer {
       throw "data length should match tile size";
     }
 
-    tileMatrix = List.generate(height, (index) => List<int>(width));
-    tileFlips = List.generate(height, (index) => List<Flips>(width));
+    tileMatrix = List.generate(height, (index) => List.generate(width, (_) => 0));
+    tileFlips = List.generate(height, (index) => List.generate(width, (_) => null));
 
     int tileIndex = 0;
     for (int y = 0; y < height; ++y) {

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import '../enums/object_alignment.dart';
 
 extension StringExtensions on String {
@@ -8,8 +6,6 @@ extension StringExtensions on String {
   double toDouble() => double.parse(this);
 
   bool toBool() => this == "1";
-
-  Uint32 toUint() => int.parse(this) as Uint32;
 
   ObjectAlignment toObjectAlignment() {
     ObjectAlignment objectAligment;

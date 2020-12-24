@@ -1,12 +1,10 @@
-import 'dart:ffi';
-
 import 'package:xml/xml.dart';
 
 import 'extensions/xml_element.dart';
 
 class WangTile {
   int tileId;
-  Uint32 wangId;
+  int wangId;
   bool hflip = false;
   bool vflip = false;
   bool dflip = false;
@@ -17,7 +15,7 @@ class WangTile {
     }
 
     tileId = element.getAttributeIntOr("tileId", tileId);
-    wangId = element.getAttributeUintOr("wangId", wangId);
+    wangId = element.getAttributeIntOr("wangId", wangId);
     hflip = element.getAttributeBoolOr("hflip", hflip);
     vflip = element.getAttributeBoolOr("vflip", vflip);
     dflip = element.getAttributeBoolOr("dflip", dflip);
