@@ -14,7 +14,7 @@ class Animation {
       (childElement) {
         switch (childElement.name.local) {
           case "frame":
-            frameList.add(Frame.fromXML(element));
+            frameList.add(Frame.fromXML(childElement));
             break;
         }
       },
