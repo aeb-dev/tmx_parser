@@ -20,7 +20,7 @@ class TmxObject {
   bool visible = true;
   // String template;
 
-  String objectType;
+  TmxObjectType objectType;
   List<Point<double>> points;
   Text text;
 
@@ -49,19 +49,14 @@ class TmxObject {
             properties ??= Properties.fromXML(childElement);
             break;
           case "ellipse":
-            points = [
-              Point(x, y),
-              Point(x + (width / 2.0), y + (height / 2.0)),
-              Point(x + width, y + height),
-              Point(x - (width / 2.0), y - (height / 2.0))
-            ];
+            objectType = TmxObjectType.ellipse;
             break;
           case "point":
-            points = [Point(x, y)];
+            objectType = TmxObjectType.point;
             break;
           case "polygon":
           case "polyline":
-            objectType = childElement.name.local;
+            objectType = childElement.name.local == "polygon" ? TmxObjectType.polygon : TmxObjectType.polyline;
             points = childElement
                 .getAttributeStrOr("points", null)
                 .split(" ")
@@ -74,6 +69,7 @@ class TmxObject {
             }).toList();
             break;
           case "text":
+            objectType = TmxObjectType.text;
             text ??= Text.fromXML(childElement);
             break;
         }
@@ -89,4 +85,12 @@ class TmxObject {
       ];
     }
   }
+}
+
+enum TmxObjectType {
+  ellipse,
+  point,
+  polygon,
+  polyline,
+  text,
 }
