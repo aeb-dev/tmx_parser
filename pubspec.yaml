@@ -6,8 +6,5 @@ homepage: https://github.com/MrMuMu/tmx_parser
 dependencies:
   xml: ^5.1.2
 
-dev_dependencies:
-  test: any
-
 environment:
   sdk: ">=2.7.0 <3.0.0"
