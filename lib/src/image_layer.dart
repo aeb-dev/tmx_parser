@@ -6,22 +6,22 @@ import 'property.dart';
 import 'tmx_image.dart';
 
 class ImageLayer {
-  int id;
+  late int id;
   String name = "";
   double offsetX = 0.0;
   double offsetY = 0.0;
   double opacity = 1.0;
   bool visible = true;
 
-  Map<String, Property> properties;
-  TmxImage image;
+  Map<String, Property>? properties;
+  TmxImage? image;
 
   ImageLayer.fromXML(XmlElement element) {
     if (element.name.local != "imagelayer") {
       throw "can not parse, element is not an 'imagelayer'";
     }
 
-    id = element.getAttributeIntOr("id", id);
+    id = element.getAttributeInt("id")!;
     name = element.getAttributeStrOr("name", name);
     offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
     offsetY = element.getAttributeDoubleOr("offsety", offsetY);
@@ -31,10 +31,10 @@ class ImageLayer {
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
         case "image":
-          image ??= TmxImage.fromXML(childElement);
+          image = TmxImage.fromXML(childElement);
           break;
       }
     });

@@ -7,21 +7,21 @@ import 'wang_color.dart';
 import 'wang_tile.dart';
 
 class WangSet {
-  String name;
-  int tile;
+  late String name;
+  late int tile;
 
   Map<String, WangCornerColor> wangCornerColors = {};
   Map<String, WangEdgeColor> wangEdgeColors = {};
   List<WangTile> wangTiles = [];
-  Map<String, Property> properties;
+  late Map<String, Property> properties;
 
   WangSet.fromXML(XmlElement element) {
     if (element.name.local != "wangset") {
       throw "can not parse, element is not a 'wangset'";
     }
 
-    name = element.getAttributeStrOr("name", name);
-    tile = element.getAttributeIntOr("tile", tile);
+    name = element.getAttributeStr("name")!;
+    tile = element.getAttributeInt("tile")!;
 
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
@@ -40,7 +40,7 @@ class WangSet {
           wangTiles.add(wangTile);
           break;
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
       }
     });

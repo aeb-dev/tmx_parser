@@ -3,11 +3,11 @@ import 'package:xml/xml.dart';
 import 'frame.dart';
 
 class Animation {
-  List<Frame> frameList = [];
+  final List<Frame> frameList = [];
 
   Animation.fromXML(XmlElement element) {
     if (element.name.local != "animation") {
-      throw "can not parse, element is not a 'animation'";
+      throw "can not parse, element is not an 'animation'";
     }
 
     element.children.whereType<XmlElement>().forEach(

@@ -13,56 +13,63 @@ class Layer {
   static const int FLIPPED_VERTICALLY_FLAG = 0x40000000;
   static const int FLIPPED_DIAGONALLY_FLAG = 0x20000000;
 
-  int id;
+  late int id;
   String name = "";
-  int width;
-  int height;
+  late int width;
+  late int height;
   double opacity = 1.0;
   bool visible = true;
-  String tintColor;
+  String? tintColor;
   double offsetX = 0.0;
   double offsetY = 0.0;
+  double parallaxX = 0.0;
+  double parallaxY = 0.0;
 
-  Map<String, Property> properties;
+  Map<String, Property>? properties;
+  Data? data;
 
-  List<List<int>> tileMatrix;
-  List<List<Flips>> tileFlips;
+  late List<List<int>> tileMatrix;
+  late List<List<Flips?>> tileFlips;
 
   Layer.fromXML(XmlElement element) {
     if (element.name.local != "layer") {
       throw "can not parse, element is not a 'layer'";
     }
 
-    id = element.getAttributeIntOr("id", id);
+    id = element.getAttributeInt("id")!;
     name = element.getAttributeStrOr("name", name);
-    width = element.getAttributeIntOr("width", width);
-    height = element.getAttributeIntOr("height", height);
+    width = element.getAttributeInt("width")!;
+    height = element.getAttributeInt("height")!;
+    opacity = element.getAttributeDoubleOr("opacity", opacity);
     visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStrOr("tintcolor", tintColor);
+    tintColor = element.getAttributeStr("tintcolor");
     offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
     offsetY = element.getAttributeDoubleOr("offsety", offsetY);
+    parallaxX = element.getAttributeDoubleOr("parallaxx", parallaxX);
+    parallaxY = element.getAttributeDoubleOr("parallaxy", parallaxY);
 
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
         case "data":
-          _parseData(childElement);
+          data = Data.fromXML(childElement);
+          _parseData(data!.rawData!);
           break;
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
       }
     });
   }
 
-  void _parseData(XmlElement element) {
-    final Uint8List data = Data.fromXML(element);
-
+  void _parseData(Uint8List data) {
     if (data.length != width * height * 4) {
       throw "data length should match tile size";
     }
 
-    tileMatrix = List.generate(height, (index) => List.generate(width, (_) => 0));
-    tileFlips = List.generate(height, (index) => List.generate(width, (_) => null));
+    tileMatrix =
+        List.generate(height, (index) => List.generate(width, (_) => 0, growable: false), growable: false);
+    tileFlips =
+        List.generate(height, (index) => List.generate(width, (_) => null, growable: false), growable: false);
 
     int tileIndex = 0;
     for (int y = 0; y < height; ++y) {
@@ -93,12 +100,6 @@ class Layer {
           flippedVertically,
           flippedDiagonally,
         );
-      }
-
-      if (element.children
-          .whereType<XmlElement>()
-          .any((element) => element != null)) {
-        throw "we do not support any child for 'data' node";
       }
     }
   }

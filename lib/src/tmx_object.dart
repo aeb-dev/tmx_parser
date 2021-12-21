@@ -8,7 +8,7 @@ import 'property.dart';
 import 'text.dart';
 
 class TmxObject {
-  int id;
+  late int id;
   String name = "";
   String type = "";
   double x = 0.0;
@@ -16,22 +16,22 @@ class TmxObject {
   double width = 0.0;
   double height = 0.0;
   double rotation = 0.0; // in degrees, clockwise
-  int gid;
+  int? gid;
   bool visible = true;
   // String template;
 
-  TmxObjectType objectType;
-  List<Point<double>> points;
-  Text text;
+  late TmxObjectType objectType;
+  List<Point<double>>? points;
+  Text? text;
 
-  Map<String, Property> properties;
+  Map<String, Property>? properties;
 
   TmxObject.fromXML(XmlElement element) {
     if (element.name.local != "object") {
       throw "can not parse, element is not a 'object'";
     }
 
-    id = element.getAttributeIntOr("id", id);
+    id = element.getAttributeInt("id")!;
     name = element.getAttributeStrOr("name", name);
     type = element.getAttributeStrOr("type", type);
     x = element.getAttributeDoubleOr("x", x);
@@ -39,14 +39,14 @@ class TmxObject {
     width = element.getAttributeDoubleOr("width", width);
     height = element.getAttributeDoubleOr("height", height);
     rotation = element.getAttributeDoubleOr("rotation", rotation);
-    gid = element.getAttributeIntOr("gid", gid);
+    gid = element.getAttributeInt("gid");
     visible = element.getAttributeBoolOr("visible", visible);
 
     element.children.whereType<XmlElement>().forEach(
       (childElement) {
         switch (childElement.name.local) {
           case "properties":
-            properties ??= Properties.fromXML(childElement);
+            properties = Properties.fromXML(childElement);
             break;
           case "ellipse":
             objectType = TmxObjectType.ellipse;
@@ -56,9 +56,12 @@ class TmxObject {
             break;
           case "polygon":
           case "polyline":
-            objectType = childElement.name.local == "polygon" ? TmxObjectType.polygon : TmxObjectType.polyline;
+            objectType = childElement.name.local == "polygon"
+                ? TmxObjectType.polygon
+                : TmxObjectType.polyline;
+
             points = childElement
-                .getAttributeStrOr("points", null)
+                .getAttributeStr("points")!
                 .split(" ")
                 .map((pointS) {
               final List<String> pointPairs = pointS.split(",");
@@ -70,13 +73,14 @@ class TmxObject {
             break;
           case "text":
             objectType = TmxObjectType.text;
-            text ??= Text.fromXML(childElement);
+            text = Text.fromXML(childElement);
             break;
         }
       },
     );
 
     if (gid == null && points == null) {
+      objectType = TmxObjectType.polygon;
       points = [
         Point(0.0, 0.0),
         Point(0.0, height),

@@ -3,21 +3,15 @@ import 'package:xml/xml.dart';
 import 'extensions/xml_element.dart';
 
 class WangTile {
-  int tileId;
-  int wangId;
-  bool hflip = false;
-  bool vflip = false;
-  bool dflip = false;
+  late int tileId;
+  late int wangId;
 
   WangTile.fromXML(XmlElement element) {
     if (element.name.local != "wangtile") {
       throw "can not parse, element is not a 'wangtile'";
     }
 
-    tileId = element.getAttributeIntOr("tileId", tileId);
-    wangId = element.getAttributeIntOr("wangId", wangId);
-    hflip = element.getAttributeBoolOr("hflip", hflip);
-    vflip = element.getAttributeBoolOr("vflip", vflip);
-    dflip = element.getAttributeBoolOr("dflip", dflip);
+    tileId = element.getAttributeInt("tileId")!;
+    wangId = element.getAttributeInt("wangId")!;
   }
 }
