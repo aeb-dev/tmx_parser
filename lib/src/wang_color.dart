@@ -3,15 +3,15 @@ import 'package:xml/xml.dart';
 import 'extensions/xml_element.dart';
 
 abstract class _WangColor {
-  String name;
-  String color;
-  int tile;
+  late String name;
+  late String color;
+  late int tile;
   double probability = 0.0;
 
   void fromXML(XmlElement element) {
-    name = element.getAttributeStrOr("name", name);
-    color = element.getAttributeStrOr("color", color);
-    tile = element.getAttributeIntOr("tile", tile);
+    name = element.getAttributeStr("name")!;
+    color = element.getAttributeStr("color")!;
+    tile = element.getAttributeInt("tile")!;
     probability = element.getAttributeDoubleOr("probability", probability);
   }
 }
@@ -22,7 +22,7 @@ class WangCornerColor extends _WangColor {
       throw "can not parse, element is not a 'wangcornercolor'";
     }
 
-    fromXML(element);
+    super.fromXML(element);
   }
 }
 
@@ -32,6 +32,6 @@ class WangEdgeColor extends _WangColor {
       throw "can not parse, element is not a 'wangedgecolor'";
     }
 
-    fromXML(element);
+    super.fromXML(element);
   }
 }

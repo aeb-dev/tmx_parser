@@ -9,22 +9,22 @@ import 'properties.dart';
 import 'tile_set.dart';
 
 class TmxMap {
-  String version;
-  String tiledVersion;
-  String orientation;
-  String renderOrder;
+  late String version;
+  String? tiledVersion;
+  late String orientation;
+  String? renderOrder;
   int compressionLevel = -1;
-  double width;
-  double height;
-  double tileWidth;
-  double tileHeight;
-  int hexSideLength;
-  String staggerAxis;
-  String staggerIndex;
-  String backgroundColor;
-  bool infinite;
+  late double width;
+  late double height;
+  late double tileWidth;
+  late double tileHeight;
+  int? hexSideLength;
+  String? staggerAxis;
+  String? staggerIndex;
+  String? backgroundColor; // null means transparent
+  bool infinite = false;
 
-  Map<String, dynamic> properties;
+  Map<String, dynamic>? properties;
 
   Map<String, TileSet> tileSets = {};
   List<Layer> layers = [];
@@ -39,21 +39,20 @@ class TmxMap {
       throw "can not parse, element is not a 'map'";
     }
 
-    version = element.getAttributeStrOr("version", version);
-    tiledVersion = element.getAttributeStrOr("tiledversion", tiledVersion);
-    orientation = element.getAttributeStrOr("orientation", orientation);
-    renderOrder = element.getAttributeStrOr("renderorder", renderOrder);
+    version = element.getAttributeStr("version")!;
+    tiledVersion = element.getAttributeStr("tiledversion");
+    orientation = element.getAttributeStr("orientation")!;
+    renderOrder = element.getAttributeStr("renderorder");
     compressionLevel =
         element.getAttributeIntOr("compressionlevel", compressionLevel);
-    width = element.getAttributeDoubleOr("width", width);
-    height = element.getAttributeDoubleOr("height", height);
-    tileWidth = element.getAttributeDoubleOr("tilewidth", tileWidth);
-    tileHeight = element.getAttributeDoubleOr("tileheight", tileHeight);
-    hexSideLength = element.getAttributeIntOr("hexsidelength", hexSideLength);
-    staggerAxis = element.getAttributeStrOr("staggeraxis", staggerAxis);
-    staggerIndex = element.getAttributeStrOr("staggerindex", staggerIndex);
-    backgroundColor =
-        element.getAttributeStrOr("backgroundcolor", backgroundColor);
+    width = element.getAttributeDouble("width")!;
+    height = element.getAttributeDouble("height")!;
+    tileWidth = element.getAttributeDouble("tilewidth")!;
+    tileHeight = element.getAttributeDouble("tileheight")!;
+    hexSideLength = element.getAttributeInt("hexsidelength");
+    staggerAxis = element.getAttributeStr("staggeraxis");
+    staggerIndex = element.getAttributeStr("staggerindex");
+    backgroundColor = element.getAttributeStr("backgroundcolor");
     infinite = element.getAttributeBoolOr("infinite", infinite);
 
     element.children.whereType<XmlElement>().forEach(
@@ -84,7 +83,7 @@ class TmxMap {
             renderOrderedLayers.add(group);
             break;
           case "properties":
-            properties ??= properties = Properties.fromXML(childElement);
+            properties = properties = Properties.fromXML(childElement);
         }
       },
     );
@@ -97,6 +96,6 @@ class TmxMap {
   }
 
   TileSet getTileSetByName(String name) {
-    return tileSets[name];
+    return tileSets[name]!;
   }
 }

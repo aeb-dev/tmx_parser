@@ -8,40 +8,40 @@ import 'properties.dart';
 import 'property.dart';
 
 class Group {
-  int id;
+  late int id;
   String name = "";
   double offsetX = 0.0;
   double offsetY = 0.0;
   double opacity = 1.0;
   bool visible = true;
-  String tintColor;
+  String? tintColor;
 
-  Map<String, Property> properties;
+  Map<String, Property>? properties;
 
-  List<Layer> layers = [];
-  Map<String, ObjectGroup> objectGroups = {};
-  List<ImageLayer> imageLayers = [];
-  List<Group> groups = [];
+  final List<Layer> layers = [];
+  final Map<String, ObjectGroup> objectGroups = {};
+  final List<ImageLayer> imageLayers = [];
+  final List<Group> groups = [];
 
-  List<dynamic> renderOrderedLayers = [];
+  final List<dynamic> renderOrderedLayers = [];
 
   Group.fromXML(XmlElement element) {
     if (element.name.local != "group") {
       throw "can not parse, element is not a 'group'";
     }
 
-    id = element.getAttributeIntOr("id", id);
+    id = element.getAttributeInt("id")!;
     name = element.getAttributeStrOr("name", name);
     offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
     offsetY = element.getAttributeDoubleOr("offsety", offsetY);
     opacity = element.getAttributeDoubleOr("opacity", opacity);
     visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStrOr("tintcolor", tintColor);
+    tintColor = element.getAttributeStr("tintcolor");
 
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
         case "layer":
           final Layer layer = Layer.fromXML(childElement);

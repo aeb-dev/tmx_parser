@@ -17,48 +17,51 @@ import 'wang_set.dart';
 import 'wang_sets.dart';
 
 class TileSet {
-  int firstGid;
-  String source;
-  String name;
-  double tileWidth;
-  double tileHeight;
+  late int firstGid;
+  late String? source;
+  late String name;
+  late double tileWidth;
+  late double tileHeight;
   double spacing = 0.0;
   double margin = 0.0;
-  int tileCount;
-  int columns;
+  late int tileCount;
+  late int columns;
   ObjectAlignment objectAlignment = ObjectAlignment.bottomLeft;
 
-  TmxImage image;
   TileOffset tileOffset = TileOffset.zero();
-  Grid grid;
-  Map<String, Property> properties;
-  Map<String, Terrain> terrainTypes;
-  Map<String, WangSet> wangSets;
-  Map<int, Tile> tiles = {};
+
+  TmxImage? image;
+  Grid? grid;
+  Map<String, Property>? properties;
+  Map<String, Terrain>? terrainTypes;
+  Map<String, WangSet>? wangSets;
+
+  final Map<int, Tile> tiles = {};
 
   TileSet.fromXML(XmlElement element) {
     if (element.name.local != "tileset") {
       throw "can not parse, element is not a 'tileset'";
     }
 
-    firstGid = element.getAttributeIntOr("firstgid", firstGid);
-    source = element.getAttributeStrOr("source", source);
+    firstGid = element.getAttributeInt("firstgid")!;
+    source = element.getAttributeStr("source");
 
-    final String sourceExtension = source?.split(".")?.last;
-    if (sourceExtension == "tsx") {
-      final File file = File(source);
+    final String? sourceExtension = source?.split(".").last;
+    if (sourceExtension != null && sourceExtension == "tsx") {
+      final File file = File(source!);
       final XmlDocument tsx = XmlDocument.parse(file.readAsStringSync());
       element = tsx.rootElement;
+
+      source = element.getAttributeStr("source");
     }
 
-    source = element.getAttributeStrOr("source", source);
-    name = element.getAttributeStrOr("name", name);
-    tileWidth = element.getAttributeDoubleOr("tilewidth", tileWidth);
-    tileHeight = element.getAttributeDoubleOr("tileheight", tileHeight);
+    name = element.getAttributeStr("name")!;
+    tileWidth = element.getAttributeDouble("tilewidth")!;
+    tileHeight = element.getAttributeDouble("tileheight")!;
     spacing = element.getAttributeDoubleOr("spacing", spacing);
     margin = element.getAttributeDoubleOr("margin", margin);
-    tileCount = element.getAttributeIntOr("tilecount", tileCount);
-    columns = element.getAttributeIntOr("columns", columns);
+    tileCount = element.getAttributeInt("tilecount")!;
+    columns = element.getAttributeInt("columns")!;
     objectAlignment = element
         .getAttributeStrOr("objectalignment", "unspecified")
         .toObjectAlignment();
@@ -66,22 +69,22 @@ class TileSet {
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
         case "image":
-          image ??= TmxImage.fromXML(childElement);
+          image = TmxImage.fromXML(childElement);
           break;
         case "tileoffset":
-          tileOffset ??= TileOffset.fromXML(childElement);
+          tileOffset = TileOffset.fromXML(childElement);
           break;
         case "grid":
-          grid ??= Grid.fromXML(childElement);
+          grid = Grid.fromXML(childElement);
           break;
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
         case "terraintypes":
-          terrainTypes ??= TerrainTypes.fromXML(childElement);
+          terrainTypes = TerrainTypes.fromXML(childElement);
           break;
         case "wangsets":
-          wangSets ??= WangSets.fromXML(childElement);
+          wangSets = WangSets.fromXML(childElement);
           break;
         case "tile":
           final Tile tile = Tile.fromXML(childElement);
@@ -93,12 +96,12 @@ class TileSet {
 
   Tile getTileByGid(int gid) {
     int tileIndex = gid - firstGid;
-    Tile tile = tiles[tileIndex];
+    Tile tile = tiles[tileIndex]!;
 
     return tile;
   }
 
   Tile getTileById(int id) {
-    return tiles[id];
+    return tiles[id]!;
   }
 }

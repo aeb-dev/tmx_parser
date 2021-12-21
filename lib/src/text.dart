@@ -6,7 +6,7 @@ class Text {
   String fontFamily = "sans-serif";
   double pixelSize = 16.0; // font size in pixels
   bool wrap = false;
-  String color;
+  String color = "#000000";
   bool bold = false;
   bool italic = false;
   bool underline = false;

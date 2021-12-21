@@ -6,17 +6,17 @@ import 'property.dart';
 import 'tmx_object.dart';
 
 class ObjectGroup {
-  int id;
-  String name;
-  String color;
+  late int id;
+  String name = "";
+  String color = "#a0a0a4";
   double opacity = 1.0;
   bool visible = true;
-  String tintColor;
+  String? tintColor;
   double offsetX = 0.0;
   double offsetY = 0.0;
   String drawOrder = "topdown";
 
-  Map<String, Property> properties;
+  Map<String, Property>? properties;
   Map<String, TmxObject> objectMapByName = {};
   Map<int, TmxObject> objectMapById = {};
 
@@ -25,12 +25,12 @@ class ObjectGroup {
       throw "can not parse, element is not a 'objectgroup'";
     }
 
-    id = element.getAttributeIntOr("id", id);
+    id = element.getAttributeInt("id")!;
     name = element.getAttributeStrOr("name", name);
     color = element.getAttributeStrOr("color", color);
     opacity = element.getAttributeDoubleOr("opacity", opacity);
     visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStrOr("tintcolor", tintColor);
+    tintColor = element.getAttributeStr("tintcolor");
     offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
     offsetY = element.getAttributeDoubleOr("offsety", offsetY);
     drawOrder = element.getAttributeStrOr("draworder", drawOrder);
@@ -39,7 +39,7 @@ class ObjectGroup {
     element.children.whereType<XmlElement>().forEach((childElement) {
       switch (childElement.name.local) {
         case "properties":
-          properties ??= Properties.fromXML(childElement);
+          properties = Properties.fromXML(childElement);
           break;
         case "object":
           final TmxObject object = TmxObject.fromXML(childElement);
