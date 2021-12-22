@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:universal_io/io.dart';
 import 'package:xml/xml.dart';
 
 class Data {
@@ -53,7 +53,6 @@ class Data {
             data = zlib.decode(data);
             break;
           case "zstd":
-
           default:
             throw "unsupported compression $compression";
         }
