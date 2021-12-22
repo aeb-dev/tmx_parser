@@ -94,9 +94,9 @@ class TileSet {
     });
   }
 
-  Tile getTileByGid(int gid) {
+  Tile? getTileByGid(int gid) {
     int tileIndex = gid - firstGid;
-    Tile tile = tiles[tileIndex]!;
+    Tile? tile = tiles[tileIndex];
 
     return tile;
   }
