@@ -101,7 +101,7 @@ class TileSet {
     return tile;
   }
 
-  Tile getTileById(int id) {
-    return tiles[id]!;
+  Tile? getTileById(int id) {
+    return tiles[id];
   }
 }

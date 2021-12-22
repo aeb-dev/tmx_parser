@@ -2,6 +2,8 @@ name: tmx_parser
 version: 0.1.0
 description: Tiled .tmx file parser
 homepage: https://github.com/MrMuMu/tmx_parser
+repository: https://github.com/MrMuMu/tmx_parser
+issue_tracker: https://github.com/aeb-dev/tmx_parser/issues
 
 dependencies:
   xml: ^5.1.2
