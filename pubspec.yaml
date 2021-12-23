@@ -1,5 +1,5 @@
 name: tmx_parser
-version: 0.1.2
+version: 0.1.3
 description: A cross platform parser for files created by Tiled Map Editor
 homepage: https://github.com/MrMuMu/tmx_parser
 repository: https://github.com/MrMuMu/tmx_parser
