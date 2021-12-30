@@ -1,3 +1,5 @@
+## 0.1.4
+- Parse bool properties of tiled objects
 ## 0.1.3
 - Switch from dart:io to universal_io
 ## 0.1.2

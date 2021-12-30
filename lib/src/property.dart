@@ -31,6 +31,7 @@ class Property {
       case "string":
         value = element.getAttributeStrOr("value", "");
         break;
+      case "object": // TODO: implement object property
       default:
         throw "Unexpected 'type' value $type";
     }

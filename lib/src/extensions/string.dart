@@ -5,7 +5,8 @@ extension StringExtensions on String {
 
   double toDouble() => double.parse(this);
 
-  bool toBool() => this == "1";
+  bool toBool() =>
+      this == "1" || this == "true" || this == "True" || this == "TRUE";
 
   ObjectAlignment toObjectAlignment() {
     ObjectAlignment objectAligment;
