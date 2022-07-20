@@ -1,26 +1,34 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+
+import 'helpers/xml_accessor.dart';
 import 'wang_set.dart';
 
-class WangSets {
-  WangSets._();
+class WangSets extends DelegatingList<WangSet> with XmlTraverser {
+  WangSets() : super([]);
 
-  static Map<String, WangSet> fromXML(XmlElement element) {
-    if (element.name.local != "wangsets") {
-      throw "can not parse, element is not a 'wangsets'";
+  @internal
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "wangsets",
+      "can not parse, element is not a 'wangsets'",
+    );
+  }
+
+  @internal
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    ;
+    switch (child.localName) {
+      case "wangset":
+        WangSet wangSet = WangSet();
+        await wangSet.loadXml(si);
+        super.add(wangSet);
+        break;
     }
-
-    final Map<String, WangSet> wangSets = {};
-
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "wangset":
-          final WangSet wangSet = WangSet.fromXML(childElement);
-          wangSets[wangSet.name] = wangSet;
-          break;
-      }
-    });
-
-    return wangSets;
   }
 }

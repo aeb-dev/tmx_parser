@@ -1,100 +1,84 @@
+import 'dart:async';
 import 'dart:math';
 
-import 'package:xml/xml.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
-import 'extensions/xml_element.dart';
+import 'enums/object_type.dart';
+import 'helpers/xml_accessor.dart';
 import 'properties.dart';
 import 'property.dart';
 import 'text.dart';
 
-class TmxObject {
+class TmxObject with XmlTraverser {
   late int id;
-  String name = "";
-  String type = "";
-  double x = 0.0;
-  double y = 0.0;
-  double width = 0.0;
-  double height = 0.0;
-  double rotation = 0.0; // in degrees, clockwise
-  int? gid;
-  bool visible = true;
+  late String name;
+  late String type;
+  late double x;
+  late double y;
+  late double width;
+  late double height;
+  late double rotation; // in degrees, clockwise
+  late int? gid;
+  late bool visible;
   // String template;
 
-  late TmxObjectType objectType;
+  ObjectType objectType = ObjectType.rectangle;
   List<Point<double>>? points;
   Text? text;
 
   Map<String, Property>? properties;
 
-  TmxObject.fromXML(XmlElement element) {
-    if (element.name.local != "object") {
-      throw "can not parse, element is not a 'object'";
-    }
-
-    id = element.getAttributeInt("id")!;
-    name = element.getAttributeStrOr("name", name);
-    type = element.getAttributeStrOr("type", type);
-    x = element.getAttributeDoubleOr("x", x);
-    y = element.getAttributeDoubleOr("y", y);
-    width = element.getAttributeDoubleOr("width", width);
-    height = element.getAttributeDoubleOr("height", height);
-    rotation = element.getAttributeDoubleOr("rotation", rotation);
-    gid = element.getAttributeInt("gid");
-    visible = element.getAttributeBoolOr("visible", visible);
-
-    element.children.whereType<XmlElement>().forEach(
-      (childElement) {
-        switch (childElement.name.local) {
-          case "properties":
-            properties = Properties.fromXML(childElement);
-            break;
-          case "ellipse":
-            objectType = TmxObjectType.ellipse;
-            break;
-          case "point":
-            objectType = TmxObjectType.point;
-            break;
-          case "polygon":
-          case "polyline":
-            objectType = childElement.name.local == "polygon"
-                ? TmxObjectType.polygon
-                : TmxObjectType.polyline;
-
-            points = childElement
-                .getAttributeStr("points")!
-                .split(" ")
-                .map((pointS) {
-              final List<String> pointPairs = pointS.split(",");
-              return Point(
-                double.parse(pointPairs.first),
-                double.parse(pointPairs.last),
-              );
-            }).toList();
-            break;
-          case "text":
-            objectType = TmxObjectType.text;
-            text = Text.fromXML(childElement);
-            break;
-        }
-      },
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "object",
+      "can not parse, element is not an 'object'",
     );
 
-    if (gid == null && points == null) {
-      objectType = TmxObjectType.polygon;
-      points = [
-        Point(0.0, 0.0),
-        Point(0.0, height),
-        Point(width, height),
-        Point(width, 0.0),
-      ];
+    id = element.getAttributeInt("id")!;
+    name = element.getAttributeStrOr("name", "");
+    type = element.getAttributeStrOr("class", "");
+    x = element.getAttributeDoubleOr("x", 0.0);
+    y = element.getAttributeDoubleOr("y", 0.0);
+    width = element.getAttributeDoubleOr("width", 0.0);
+    height = element.getAttributeDoubleOr("height", 0.0);
+    rotation = element.getAttributeDoubleOr("rotation", 0.0);
+    gid = element.getAttributeInt("gid");
+    visible = element.getAttributeBoolOr("visible", true);
+  }
+
+  @override
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    ;
+    switch (child.localName) {
+      case "ellipse":
+        objectType = ObjectType.ellipse;
+        break;
+      case "point":
+        objectType = ObjectType.point;
+        break;
+      case "polygon":
+      case "polyline":
+        objectType = child.localName.toObjectType();
+        points = child.getAttributeStr("points")!.split(" ").map((pointS) {
+          final List<String> pointPairs = pointS.split(",");
+          return Point(
+            double.parse(pointPairs.first),
+            double.parse(pointPairs.last),
+          );
+        }).toList();
+        break;
+      case "text":
+        objectType = ObjectType.text;
+        text = Text();
+        await text!.loadXml(si);
+        break;
+      case "properties":
+        properties = Properties();
+        await (properties as Properties).loadXml(si);
+        break;
     }
   }
-}
-
-enum TmxObjectType {
-  ellipse,
-  point,
-  polygon,
-  polyline,
-  text,
 }

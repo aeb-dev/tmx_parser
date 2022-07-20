@@ -1,37 +1,45 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+import 'package:meta/meta.dart';
+import 'package:tmx_parser/src/helpers/xml_accessor.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
-abstract class _WangColor {
+import 'property.dart';
+import 'properties.dart';
+
+class WangColor with XmlTraverser {
   late String name;
-  late String color;
+  late String className;
+  late int color;
   late int tile;
-  double probability = 0.0;
+  late double probability;
 
-  void fromXML(XmlElement element) {
+  Map<String, Property>? properties;
+
+  @internal
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "wangcolor",
+      "can not parse, element is not a 'wangcolor'",
+    );
+
     name = element.getAttributeStr("name")!;
-    color = element.getAttributeStr("color")!;
-    tile = element.getAttributeInt("tile")!;
-    probability = element.getAttributeDoubleOr("probability", probability);
+    className = element.getAttributeStrOr("className", "");
+    color = element.getAttributeColor("color")!;
+    tile = element.getAttributeIntOr("tile", -1);
+    probability = element.getAttributeDoubleOr("probability", 0.0);
   }
-}
 
-class WangCornerColor extends _WangColor {
-  WangCornerColor.fromXML(XmlElement element) {
-    if (element.name.local != "wangcornercolor") {
-      throw "can not parse, element is not a 'wangcornercolor'";
+  @internal
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    ;
+    switch (child.localName) {
+      case "properties":
+        properties = Properties();
+        await (properties as Properties).loadXml(si);
+        break;
     }
-
-    super.fromXML(element);
-  }
-}
-
-class WangEdgeColor extends _WangColor {
-  WangEdgeColor.fromXML(XmlElement element) {
-    if (element.name.local != "wangedgecolor") {
-      throw "can not parse, element is not a 'wangedgecolor'";
-    }
-
-    super.fromXML(element);
   }
 }

@@ -1,69 +1,64 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+
+import 'helpers/xml_accessor.dart';
 import 'image_layer.dart';
 import 'layer.dart';
+import 'tile_layer.dart';
 import 'object_group.dart';
 import 'properties.dart';
-import 'property.dart';
 
-class Group {
-  late int id;
-  String name = "";
-  double offsetX = 0.0;
-  double offsetY = 0.0;
-  double opacity = 1.0;
-  bool visible = true;
-  String? tintColor;
-
-  Map<String, Property>? properties;
-
-  final List<Layer> layers = [];
+class Group extends Layer {
+  final List<TileLayer> tileLayers = [];
   final Map<String, ObjectGroup> objectGroups = {};
   final List<ImageLayer> imageLayers = [];
   final List<Group> groups = [];
 
-  final List<dynamic> renderOrderedLayers = [];
+  final List<Layer> renderOrderedLayers = [];
 
-  Group.fromXML(XmlElement element) {
-    if (element.name.local != "group") {
-      throw "can not parse, element is not a 'group'";
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "group",
+      "can not parse, element is not a 'group'",
+    );
+
+    super.readAttributes(si);
+  }
+
+  @override
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    switch (child.localName) {
+      case "properties":
+        properties = Properties();
+        await (properties as Properties).loadXml(si);
+        break;
+      case "layer":
+        TileLayer tileLayer = TileLayer();
+        await tileLayer.loadXml(si);
+        tileLayers.add(tileLayer);
+        renderOrderedLayers.add(tileLayer);
+        break;
+      case "objectgroup":
+        ObjectGroup objectGroup = await ObjectGroup();
+        await objectGroup.loadXml(si);
+        objectGroups[objectGroup.name] = objectGroup;
+        renderOrderedLayers.add(objectGroup);
+        break;
+      case "imagelayer":
+        ImageLayer imageLayer = await ImageLayer();
+        await imageLayer.loadXml(si);
+        imageLayers.add(imageLayer);
+        renderOrderedLayers.add(imageLayer);
+        break;
+      case "group":
+        Group group = await Group();
+        await group.loadXml(si);
+        groups.add(group);
+        renderOrderedLayers.add(group);
+        break;
     }
-
-    id = element.getAttributeInt("id")!;
-    name = element.getAttributeStrOr("name", name);
-    offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
-    offsetY = element.getAttributeDoubleOr("offsety", offsetY);
-    opacity = element.getAttributeDoubleOr("opacity", opacity);
-    visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStr("tintcolor");
-
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "properties":
-          properties = Properties.fromXML(childElement);
-          break;
-        case "layer":
-          final Layer layer = Layer.fromXML(childElement);
-          layers.add(layer);
-          renderOrderedLayers.add(layer);
-          break;
-        case "objectgroup":
-          final ObjectGroup objectGroup = ObjectGroup.fromXML(childElement);
-          objectGroups[objectGroup.name] = objectGroup;
-          renderOrderedLayers.add(objectGroup);
-          break;
-        case "imagelayer":
-          final ImageLayer imageLayer = ImageLayer.fromXML(childElement);
-          imageLayers.add(imageLayer);
-          renderOrderedLayers.add(imageLayer);
-          break;
-        case "group":
-          final Group group = Group.fromXML(childElement);
-          groups.add(group);
-          renderOrderedLayers.add(group);
-          break;
-      }
-    });
   }
 }

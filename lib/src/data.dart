@@ -1,64 +1,59 @@
-import 'dart:convert';
+import 'dart:async';
+import 'dart:convert' hide Encoding;
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:universal_io/io.dart';
-import 'package:xml/xml.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
-class Data {
-  String? encoding;
-  String? compression;
-  Uint8List? rawData;
+import 'enums/compression.dart';
+import 'enums/encoding.dart';
+import 'helpers/xml_accessor.dart';
 
-  // final Map<int, Tile> tiles = {};
+class Data with XmlTraverser {
+  late Encoding encoding;
+  late Compression compression;
+  late Uint8List rawData;
 
-  Data.fromXML(XmlElement element) {
-    if (element.name.local != "data") {
-      throw "can not parse, element is not a 'data'";
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "data",
+      "can not parse, element is not a 'data'",
+    );
+    encoding = element.getAttributeStrOr("encoding", "").toEncoding();
+    compression = element
+        .getAttributeStrOr("compression", "uncompressed")
+        .toCompression();
+  }
+
+  @override
+  void readText(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+
+    List<int> data;
+    switch (encoding) {
+      case Encoding.csv:
+        data = element.text.trim().split(",").map((e) => int.parse(e)).toList();
+        break;
+      case Encoding.base64:
+        data = base64Decode(element.text.trim());
+        break;
     }
 
-    encoding = element.getAttribute("encoding");
-    compression = element.getAttribute("compression");
-
-    if (encoding == null) {
-      throw "unsupported 'data' node";
-      // element.children.whereType<XmlElement>().forEach((childElement) {
-      //   switch (childElement.name.local) {
-      //     case "tile":
-      //       final Tile tile = Tile.fromXML(childElement);
-      //       tiles[tile.id] = tile;
-      //       break;
-      //     // case "chunk":
-      //     //   break;
-      //   }
-      // });
-    } else {
-      late List<int> data;
-      switch (encoding) {
-        case "csv":
-          data = element.innerText.split(",").map((e) => int.parse(e)).toList();
-          break;
-        case "base64":
-          data = base64Decode(element.innerText.trim());
-          break;
-        default:
-          throw "unsupported encoding $encoding";
-      }
-
-      if (compression != null) {
-        switch (compression) {
-          case "gzip":
-            data = gzip.decode(data);
-            break;
-          case "zlib":
-            data = zlib.decode(data);
-            break;
-          case "zstd":
-          default:
-            throw "unsupported compression $compression";
-        }
-      }
-
-      rawData = Uint8List.fromList(data);
+    switch (compression) {
+      case Compression.uncompressed:
+        break;
+      case Compression.gzip:
+        data = gzip.decode(data);
+        break;
+      case Compression.zlib:
+        data = zlib.decode(data);
+        break;
+      case Compression.zstd:
+        throw "unsupported compression $compression";
     }
+
+    rawData = Uint8List.fromList(data);
   }
 }

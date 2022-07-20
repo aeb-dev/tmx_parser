@@ -1,39 +1,69 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+import 'package:xml/xml_events.dart';
 
-class Property {
+import 'enums/property_type.dart';
+import 'helpers/xml_accessor.dart';
+import 'properties.dart';
+
+class Property with XmlTraverser {
   late String name;
-  String type = "string";
-  late dynamic value;
+  late PropertyType type;
 
-  Property.fromXML(XmlElement element) {
-    if (element.name.local != "property") {
-      throw "can not parse, element is not a 'property'";
-    }
+  dynamic value;
+  Map<String, Property>? properties;
 
-    name = element.getAttribute("name")!;
-    type = element.getAttributeStrOr("type", type);
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "property",
+      "can not parse, element is not a 'property'",
+    );
+
+    name = element.getAttributeStr("name")!;
+    type = element.getAttributeStrOr("type", "string").toPropertyType();
 
     switch (type) {
-      case "int":
+      case PropertyType.int:
+      case PropertyType.object:
         value = element.getAttributeIntOr("value", 0);
         break;
-      case "float":
+      case PropertyType.float:
         value = element.getAttributeDoubleOr("value", 0.0);
         break;
-      case "bool":
+      case PropertyType.bool:
         value = element.getAttributeBoolOr("value", false);
         break;
-      case "color":
+      case PropertyType.color:
         value = element.getAttributeStrOr("value", "#00000000");
         break;
-      case "string":
-        value = element.getAttributeStrOr("value", "");
+      case PropertyType.string:
+        value = element.getAttributeStr("value");
         break;
-      case "object": // TODO: implement object property
-      default:
-        throw "Unexpected 'type' value $type";
+      case PropertyType.file:
+        value = element.getAttributeStrOr("value", ".");
+        break;
+      case PropertyType.classType:
+        break;
+    }
+  }
+
+  @override
+  void readText(StreamIterator<XmlAccessor> si) {
+    XmlTextEvent element = si.current.element as XmlTextEvent;
+    value ??= element.text;
+  }
+
+  @override
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    switch (child.localName) {
+      case "properties":
+        properties = Properties();
+        await (properties as Properties).loadXml(si);
+        break;
     }
   }
 }

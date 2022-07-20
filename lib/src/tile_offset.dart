@@ -1,19 +1,29 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
 
-class TileOffset {
-  double x = 0.0;
-  double y = 0.0;
+import 'helpers/xml_accessor.dart';
+import 'helpers/xml_traverser.dart';
 
-  TileOffset.fromXML(XmlElement element) {
-    if (element.name.local != "tileoffset") {
-      throw "can not parse, element is not a 'tileoffset'";
-    }
+class TileOffset with XmlTraverser {
+  late double x;
+  late double y;
 
-    x = element.getAttributeDoubleOr("x", x);
-    y = element.getAttributeDoubleOr("y", y);
+  TileOffset();
+
+  TileOffset.zero() {
+    x = 0.0;
+    y = 0.0;
   }
 
-  TileOffset.zero();
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "tileoffset",
+      "can not parse, element is not a 'tileoffset'",
+    );
+
+    x = element.getAttributeDoubleOr("x", 0.0);
+    y = element.getAttributeDoubleOr("y", 0.0);
+  }
 }

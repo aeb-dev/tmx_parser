@@ -1,17 +1,27 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+import 'package:meta/meta.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
-class WangTile {
+import 'helpers/xml_accessor.dart';
+
+class WangTile with XmlTraverser {
   late int tileId;
-  late int wangId;
+  late List<int> wangId;
 
-  WangTile.fromXML(XmlElement element) {
-    if (element.name.local != "wangtile") {
-      throw "can not parse, element is not a 'wangtile'";
-    }
+  @internal
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "wangtile",
+      "can not parse, element is not a 'wangtile'",
+    );
 
-    tileId = element.getAttributeInt("tileId")!;
-    wangId = element.getAttributeInt("wangId")!;
+    tileId = element.getAttributeInt("tileid")!;
+    wangId = element
+        .getAttributeStr("wangid")!
+        .split(",")
+        .map((i) => int.parse(i))
+        .toList();
   }
 }

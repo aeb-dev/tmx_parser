@@ -1,48 +1,55 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+import 'package:meta/meta.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+
+import 'helpers/xml_accessor.dart';
 import 'properties.dart';
 import 'property.dart';
 import 'wang_color.dart';
 import 'wang_tile.dart';
 
-class WangSet {
+class WangSet with XmlTraverser {
   late String name;
+  late String className;
   late int tile;
 
-  Map<String, WangCornerColor> wangCornerColors = {};
-  Map<String, WangEdgeColor> wangEdgeColors = {};
-  List<WangTile> wangTiles = [];
-  late Map<String, Property> properties;
+  Map<String, Property>? properties;
+  final List<WangColor> wangColors = [];
+  final Map<int, WangTile> wangTiles = {};
 
-  WangSet.fromXML(XmlElement element) {
-    if (element.name.local != "wangset") {
-      throw "can not parse, element is not a 'wangset'";
-    }
+  @internal
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "wangset",
+      "can not parse, element is not a 'wangset'",
+    );
 
     name = element.getAttributeStr("name")!;
-    tile = element.getAttributeInt("tile")!;
+    className = element.getAttributeStrOr("className", "");
+    tile = element.getAttributeIntOr("tile", -1);
+  }
 
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "wangcornercolor":
-          final WangCornerColor wangCornerColor =
-              WangCornerColor.fromXML(childElement);
-          wangCornerColors[wangCornerColor.name] = wangCornerColor;
-          break;
-        case "wangedgecolor":
-          final WangEdgeColor wangEdgeColor =
-              WangEdgeColor.fromXML(childElement);
-          wangEdgeColors[wangEdgeColor.name] = wangEdgeColor;
-          break;
-        case "wangtile":
-          final WangTile wangTile = WangTile.fromXML(childElement);
-          wangTiles.add(wangTile);
-          break;
-        case "properties":
-          properties = Properties.fromXML(childElement);
-          break;
-      }
-    });
+  @internal
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    ;
+    switch (child.localName) {
+      case "wangcolor":
+        WangColor wangColor = WangColor();
+        await wangColor.loadXml(si);
+        wangColors.add(wangColor);
+        break;
+      case "wangtile":
+        WangTile wangTile = await WangTile();
+        await wangTile.loadXml(si);
+        wangTiles[wangTile.tileId] = wangTile;
+        break;
+      case "properties":
+        properties = Properties();
+        await (properties as Properties).loadXml(si);
+        break;
+    }
   }
 }

@@ -1,8 +1,9 @@
-import 'package:xml/xml.dart';
+import 'package:collection/collection.dart';
+import 'package:xml/xml_events.dart';
 
 import 'string.dart';
 
-extension XmlElementExtensions on XmlElement {
+extension XmlElementExtensions on XmlStartElementEvent {
   String getAttributeStrOr(String attrName, String defaultValue) =>
       this.getAttributeStr(attrName) ?? defaultValue;
 
@@ -18,19 +19,20 @@ extension XmlElementExtensions on XmlElement {
   int getAttributeColorOr(String attrName, int defaultValue) =>
       this.getAttributeColor(attrName) ?? defaultValue;
 
-  String? getAttributeStr(String attrName) => this.getAttribute(attrName);
+  String? getAttributeStr(String attrName) =>
+      this.attributes.firstWhereOrNull((attr) => attr.name == attrName)?.value;
 
   int? getAttributeInt(String attrName, {int radix = 10}) =>
-      this.getAttribute(attrName)?.toInt(radix: radix);
+      this.getAttributeStr(attrName)?.toInt(radix: radix);
 
   double? getAttributeDouble(String attrName) =>
-      this.getAttribute(attrName)?.toDouble();
+      this.getAttributeStr(attrName)?.toDouble();
 
   bool? getAttributeBool(String attrName) =>
-      this.getAttribute(attrName)?.toBool();
+      this.getAttributeStr(attrName)?.toBool();
 
   int? getAttributeColor(String attrName) {
-    String? attribute = this.getAttribute(attrName);
+    String? attribute = this.getAttributeStr(attrName);
     if (attribute == null) {
       return null;
     }

@@ -1,26 +1,32 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+
+import 'helpers/xml_accessor.dart';
 import 'property.dart';
 
-class Properties {
-  Properties._();
+class Properties extends DelegatingMap<String, Property> with XmlTraverser {
+  Properties() : super({});
 
-  static Map<String, Property> fromXML(XmlElement element) {
-    if (element.name.local != "properties") {
-      throw "can not parse, element is not a 'properties'";
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "properties",
+      "can not parse, element is not a 'properties'",
+    );
+  }
+
+  @override
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    switch (child.localName) {
+      case "property":
+        Property property = Property();
+        await property.loadXml(si);
+        super[property.name] = property;
+        break;
     }
-
-    final Map<String, Property> properties = {};
-
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "property":
-          final Property property = Property.fromXML(childElement);
-          properties[property.name] = property;
-          break;
-      }
-    });
-
-    return properties;
   }
 }

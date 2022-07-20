@@ -1,33 +1,39 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
 
-import 'extensions/xml_element.dart';
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
-class Text {
-  String fontFamily = "sans-serif";
-  double pixelSize = 16.0; // font size in pixels
-  bool wrap = false;
-  String color = "#000000";
-  bool bold = false;
-  bool italic = false;
-  bool underline = false;
-  bool kerning = false;
-  String hAlign = "left";
-  String vAlign = "top";
+import 'enums/h_align.dart';
+import 'enums/v_align.dart';
+import 'helpers/xml_accessor.dart';
 
-  Text.fromXML(XmlElement element) {
-    if (element.name.local != "text") {
-      throw "can not parse, element is not a 'text'";
-    }
+class Text with XmlTraverser {
+  late String fontFamily;
+  late double pixelSize; // font size in pixels
+  late bool wrap;
+  late int color;
+  late bool bold;
+  late bool italic;
+  late bool underline;
+  late bool kerning;
+  late HAlign hAlign;
+  late VAlign vAlign;
 
-    fontFamily = element.getAttributeStrOr("fontfamily", fontFamily);
-    pixelSize = element.getAttributeDoubleOr("pixelsize", pixelSize);
-    wrap = element.getAttributeBoolOr("wrap", wrap);
-    color = element.getAttributeStrOr("color", color);
-    bold = element.getAttributeBoolOr("bold", bold);
-    italic = element.getAttributeBoolOr("italic", italic);
-    underline = element.getAttributeBoolOr("underline", underline);
-    kerning = element.getAttributeBoolOr("kerning", kerning);
-    hAlign = element.getAttributeStrOr("halign", hAlign);
-    vAlign = element.getAttributeStrOr("valign", vAlign);
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "text",
+      "can not parse, element is not a 'text'",
+    );
+    fontFamily = element.getAttributeStrOr("fontfamily", "sans-serif");
+    pixelSize = element.getAttributeDoubleOr("pixelsize", 16.0);
+    wrap = element.getAttributeBoolOr("wrap", false);
+    color = element.getAttributeColorOr("color", 0xff000000);
+    bold = element.getAttributeBoolOr("bold", false);
+    italic = element.getAttributeBoolOr("italic", false);
+    underline = element.getAttributeBoolOr("underline", false);
+    kerning = element.getAttributeBoolOr("kerning", false);
+    hAlign = element.getAttributeStrOr("halign", "left").toHAlign();
+    vAlign = element.getAttributeStrOr("valign", "top").toVAlign();
   }
 }

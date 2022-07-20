@@ -1,9 +1,11 @@
-import 'package:xml/xml.dart';
+import 'dart:async';
+
+import 'package:tmx_parser/src/helpers/xml_traverser.dart';
 
 import 'data.dart';
-import 'extensions/xml_element.dart';
+import 'helpers/xml_accessor.dart';
 
-class TmxImage {
+class TmxImage with XmlTraverser {
   String? format;
   String? source;
   String? trans;
@@ -11,23 +13,29 @@ class TmxImage {
   double? height;
   Data? data;
 
-  TmxImage.fromXML(XmlElement element) {
-    if (element.name.local != "image") {
-      throw "can not parse, element is not an 'image'";
-    }
+  @override
+  void readAttributes(StreamIterator<XmlAccessor> si) {
+    XmlAccessor element = si.current;
+    assert(
+      element.localName == "image",
+      "can not parse, element is not an 'image'",
+    );
 
     format = element.getAttributeStr("format");
     source = element.getAttributeStr("source");
     trans = element.getAttributeStr("trans");
     width = element.getAttributeDouble("width");
     height = element.getAttributeDouble("height");
+  }
 
-    if (source == null && format != null) {
-      final XmlElement dataElement = element.children
-          .whereType<XmlElement>()
-          .firstWhere((element) => element.name.local == "data");
-
-      data = Data.fromXML(dataElement);
+  @override
+  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
+    XmlAccessor child = si.current;
+    switch (child.localName) {
+      case "data":
+        data = Data();
+        await data!.loadXml(si);
+        break;
     }
   }
 }
