@@ -1,54 +1,93 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:meta/meta.dart';
-import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+import "package:json_events/json_events.dart";
+import "package:meta/meta.dart";
+import "package:xml/xml_events.dart";
 
-import 'helpers/xml_accessor.dart';
-import 'properties.dart';
-import 'property.dart';
-import 'wang_color.dart';
-import 'wang_tile.dart';
+import "extensions/json_traverser.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
+import "property.dart";
+import "wang_color.dart";
+import "wang_tile.dart";
 
-class WangSet with XmlTraverser {
+class WangSet with XmlTraverser, JsonObjectTraverser {
   late String name;
-  late String className;
-  late int tile;
+  late String className = "";
+  late int tile = -1;
 
-  Map<String, Property>? properties;
+  final Map<String, Property> properties = {};
   final List<WangColor> wangColors = [];
   final Map<int, WangTile> wangTiles = {};
 
+  @override
   @internal
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "wangset",
       "can not parse, element is not a 'wangset'",
     );
 
-    name = element.getAttributeStr("name")!;
-    className = element.getAttributeStrOr("className", "");
-    tile = element.getAttributeIntOr("tile", -1);
+    name = element.getAttribute<String>("name");
+    className = element.getAttribute<String>("class", defaultValue: "");
+    tile = element.getAttribute<int>("tile", defaultValue: -1);
   }
 
+  @override
   @internal
-  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    ;
-    switch (child.localName) {
+  Future<void> traverseXml() async {
+    switch (six.current.asStartElement.localName) {
       case "wangcolor":
         WangColor wangColor = WangColor();
-        await wangColor.loadXml(si);
+        await wangColor.loadXml(six);
         wangColors.add(wangColor);
         break;
       case "wangtile":
-        WangTile wangTile = await WangTile();
-        await wangTile.loadXml(si);
+        WangTile wangTile = WangTile();
+        await wangTile.loadXml(six);
         wangTiles[wangTile.tileId] = wangTile;
         break;
+      case "property":
+        Property property = Property();
+        await property.loadXml(six);
+        properties[property.name] = property;
+        break;
+    }
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "name":
+        name = await this.readPropertyJsonContinue<String>();
+        break;
+      case "class":
+        className =
+            await this.readPropertyJsonContinue<String>(defaultValue: "");
+        break;
+      case "tile":
+        tile = await this.readPropertyJsonContinue<int>(defaultValue: -1);
+        break;
+      case "colors":
+        await this.loadListJson(
+          l: wangColors,
+          creator: WangColor.new,
+        );
+        break;
+      case "wangtiles":
+        await loadMapJson<int, WangTile>(
+          m: wangTiles,
+          keySelector: (wangTile) => wangTile.tileId,
+          creator: WangTile.new,
+        );
+        break;
       case "properties":
-        properties = Properties();
-        await (properties as Properties).loadXml(si);
+        await loadMapJson<String, Property>(
+          m: properties,
+          keySelector: (property) => property.name,
+          creator: Property.new,
+        );
         break;
     }
   }

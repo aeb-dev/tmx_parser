@@ -1,12 +1,16 @@
 enum HAlign {
-  left,
-  center,
-  right,
-  justify,
+  left("left"),
+  center("center"),
+  right("right"),
+  justify("justify"),
   ;
+
+  final String tiledName;
+
+  const HAlign(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension HAlignExtensions on String {
   HAlign toHAlign() {
     switch (this) {
       case "left":

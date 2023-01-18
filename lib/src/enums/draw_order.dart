@@ -1,10 +1,14 @@
 enum DrawOrder {
-  indexOrder,
-  topDown,
+  indexOrder("index"),
+  topDown("topdown"),
   ;
+
+  final String tiledName;
+
+  const DrawOrder(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension DrawOrderExtensions on String {
   DrawOrder toDrawOrder() {
     switch (this) {
       case "index":

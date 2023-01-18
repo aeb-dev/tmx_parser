@@ -1,21 +1,35 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-import 'helpers/xml_accessor.dart';
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
 
-class Frame with XmlTraverser {
+class Frame with XmlTraverser, JsonObjectTraverser {
   late int tileId;
   late int duration; // in ms
 
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  @override
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "frame",
       "can not parse, element is not a 'frame'",
     );
 
-    tileId = element.getAttributeInt("tileid")!;
-    duration = element.getAttributeInt("duration")!;
+    tileId = element.getAttribute<int>("tileid");
+    duration = element.getAttribute<int>("duration");
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "tileid":
+        tileId = await this.readPropertyJsonContinue<int>();
+        break;
+      case "duration":
+        duration = await this.readPropertyJsonContinue<int>();
+        break;
+    }
   }
 }

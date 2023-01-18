@@ -1,27 +1,42 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:meta/meta.dart';
-import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+import "package:json_events/json_events.dart";
+import "package:meta/meta.dart";
+import "package:xml/xml_events.dart";
 
-import 'helpers/xml_accessor.dart';
+import "extensions/json_traverser.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
 
-class WangTile with XmlTraverser {
+class WangTile with XmlTraverser, JsonObjectTraverser {
   late int tileId;
-  late List<int> wangId;
 
+  final List<int> wangId = [];
+
+  @override
   @internal
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "wangtile",
       "can not parse, element is not a 'wangtile'",
     );
 
-    tileId = element.getAttributeInt("tileid")!;
-    wangId = element
-        .getAttributeStr("wangid")!
+    tileId = element.getAttribute<int>("tileid");
+    element
+        .getAttribute<String>("wangid")
         .split(",")
-        .map((i) => int.parse(i))
-        .toList();
+        .forEach((i) => wangId.add(int.parse(i)));
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "tileid":
+        tileId = await this.readPropertyJsonContinue<int>();
+        break;
+      case "wangid":
+        await this.loadListJson(l: wangId);
+        break;
+    }
   }
 }

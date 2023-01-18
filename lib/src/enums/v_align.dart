@@ -1,11 +1,15 @@
 enum VAlign {
-  top,
-  center,
-  bottom,
+  top("top"),
+  center("center"),
+  bottom("bottom"),
   ;
+
+  final String tiledName;
+
+  const VAlign(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension VAlignExtensions on String {
   VAlign toVAlign() {
     switch (this) {
       case "top":

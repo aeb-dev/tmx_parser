@@ -1,9 +1,14 @@
 enum FillMode {
-  stretch,
-  preserveAspectFit,
+  stretch("stretch"),
+  preserveAspectFit("preserve-aspect-fit"),
+  ;
+
+  final String tiledName;
+
+  const FillMode(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension FillModeExtensions on String {
   FillMode toFillMode() {
     switch (this) {
       case "stretch":

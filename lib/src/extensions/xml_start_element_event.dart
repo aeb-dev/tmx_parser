@@ -1,47 +1,43 @@
-import 'package:collection/collection.dart';
-import 'package:xml/xml_events.dart';
+import "package:collection/collection.dart";
+import "package:xml/xml_events.dart";
 
-import 'string.dart';
+import "string.dart";
 
 extension XmlElementExtensions on XmlStartElementEvent {
-  String getAttributeStrOr(String attrName, String defaultValue) =>
-      this.getAttributeStr(attrName) ?? defaultValue;
+  T getAttribute<T>(
+    String attrName, {
+    T? defaultValue,
+  }) {
+    T toTypedValue(String value) {
+      if ("" is T) {
+        return value as T;
+      }
 
-  int getAttributeIntOr(String attrName, int defaultValue, {int radix = 10}) =>
-      getAttributeInt(attrName, radix: radix) ?? defaultValue;
+      if (1.1 is T) {
+        return value.toDouble() as T;
+      }
 
-  double getAttributeDoubleOr(String attrName, double defaultValue) =>
-      this.getAttributeDouble(attrName) ?? defaultValue;
+      if (1 is T) {
+        return value.toInt() as T;
+      }
 
-  bool getAttributeBoolOr(String attrName, bool defaultValue) =>
-      this.getAttributeBool(attrName) ?? defaultValue;
+      if (true is T) {
+        return value.toBool() as T;
+      }
 
-  int getAttributeColorOr(String attrName, int defaultValue) =>
-      this.getAttributeColor(attrName) ?? defaultValue;
-
-  String? getAttributeStr(String attrName) =>
-      this.attributes.firstWhereOrNull((attr) => attr.name == attrName)?.value;
-
-  int? getAttributeInt(String attrName, {int radix = 10}) =>
-      this.getAttributeStr(attrName)?.toInt(radix: radix);
-
-  double? getAttributeDouble(String attrName) =>
-      this.getAttributeStr(attrName)?.toDouble();
-
-  bool? getAttributeBool(String attrName) =>
-      this.getAttributeStr(attrName)?.toBool();
-
-  int? getAttributeColor(String attrName) {
-    String? attribute = this.getAttributeStr(attrName);
-    if (attribute == null) {
-      return null;
+      throw "Unreachable";
     }
 
-    String replace = "";
-    if (attribute.length == 6) {
-      replace = "ff";
+    String? value = this
+        .attributes
+        .firstWhereOrNull((attr) => attr.name == attrName)
+        ?.value;
+
+    if (value == null && defaultValue == null) {
+      return null as T;
     }
 
-    return attribute.replaceFirst("#", replace).toInt(radix: 16);
+    T t = value == null ? defaultValue! : toTypedValue(value);
+    return t;
   }
 }

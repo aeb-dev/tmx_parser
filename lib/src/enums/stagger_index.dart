@@ -1,10 +1,14 @@
 enum StaggerIndex {
-  even,
-  odd,
+  even("even"),
+  odd("odd"),
   ;
+
+  final String tiledName;
+
+  const StaggerIndex(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension StaggerIndexExtensions on String {
   StaggerIndex toStaggerIndex() {
     switch (this) {
       case "even":

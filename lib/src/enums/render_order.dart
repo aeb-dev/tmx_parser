@@ -1,12 +1,16 @@
 enum RenderOrder {
-  rightDown,
-  rightUp,
-  leftDown,
-  leftUp,
+  rightDown("right-down"),
+  rightUp("right-up"),
+  leftDown("left-down"),
+  leftUp("left-up"),
   ;
+
+  final String tiledName;
+
+  const RenderOrder(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension RenderOrderExtensions on String {
   RenderOrder toRenderOrder() {
     switch (this) {
       case "right-down":

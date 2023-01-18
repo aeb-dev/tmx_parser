@@ -1,10 +1,14 @@
 enum StaggerAxis {
-  x,
-  y,
+  x("x"),
+  y("y"),
   ;
+
+  final String tiledName;
+
+  const StaggerAxis(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension StaggerAxisExtensions on String {
   StaggerAxis toStaggerAxis() {
     switch (this) {
       case "x":

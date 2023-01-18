@@ -1,41 +1,66 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:tmx_parser/src/helpers/xml_traverser.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-import 'data.dart';
-import 'helpers/xml_accessor.dart';
+import "extensions/string.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
 
-class TmxImage with XmlTraverser {
-  String? format;
-  String? source;
-  String? trans;
-  double? width;
-  double? height;
-  Data? data;
+class TmxImage with XmlTraverser, JsonObjectTraverser {
+  // String? format;
+  late String source;
+  int? transparentColor;
+  int? width;
+  int? height;
+  // Data? data;
 
   @override
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "image",
       "can not parse, element is not an 'image'",
     );
 
-    format = element.getAttributeStr("format");
-    source = element.getAttributeStr("source");
-    trans = element.getAttributeStr("trans");
-    width = element.getAttributeDouble("width");
-    height = element.getAttributeDouble("height");
+    // format = element.getAttributeStr("format");
+    source = element.getAttribute<String>("source");
+    transparentColor = element.getAttribute<String?>("trans")?.toColor();
+    width = element.getAttribute<int?>("width");
+    height = element.getAttribute<int?>("height");
   }
 
+  // @override
+  // Future<void> traverseXml() async {
+  //   switch (si.current.asStartElement.localName) {
+  //     case "data":
+  //       data = Data();
+  //       await data!.loadXml(si);
+  //       break;
+  //   }
+  // }
+
   @override
-  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    switch (child.localName) {
-      case "data":
-        data = Data();
-        await data!.loadXml(si);
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      // case "format":
+      //   format = this.readPropertyJsonContinue()
+      //   break;
+      case "source":
+        source = await this.readPropertyJsonContinue<String>();
         break;
+      case "transparentcolor":
+        transparentColor =
+            (await this.readPropertyJsonContinue<String?>())?.toColor();
+        break;
+      case "width":
+        width = await this.readPropertyJsonContinue<int?>();
+        break;
+      case "height":
+        height = await this.readPropertyJsonContinue<int?>();
+        break;
+      // case "data":
+      //   break;
     }
   }
 }

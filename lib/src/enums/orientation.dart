@@ -1,12 +1,16 @@
 enum Orientation {
-  orthogonal,
-  isometric,
-  isometricStaggered,
-  hexagonal,
+  orthogonal("orthogonal"),
+  isometric("isometric"),
+  isometricStaggered("staggered"),
+  hexagonal("hexagonal"),
   ;
+
+  final String tiledName;
+
+  const Orientation(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension OrientationExtensions on String {
   Orientation toOrientation() {
     switch (this) {
       case "orthogonal":

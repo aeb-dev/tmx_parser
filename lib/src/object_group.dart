@@ -1,61 +1,106 @@
-import 'dart:async';
+import "dart:async";
 
+import "package:xml/xml_events.dart";
 
-import 'enums/draw_order.dart';
-import 'helpers/xml_accessor.dart';
-import 'layer.dart';
-import 'properties.dart';
-import 'tmx_object.dart';
+import "enums/draw_order.dart";
+import "extensions/json_map.dart";
+import "extensions/json_traverser.dart";
+import "extensions/string.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "layer.dart";
+import "tmx_object.dart";
 
 class ObjectGroup extends Layer {
-  late int? color;
-  late DrawOrder drawOrder;
+  int? color;
+  late DrawOrder drawOrder = DrawOrder.topDown;
 
-  final Map<String, TmxObject> objectMapByName = {};
-  final Map<int, TmxObject> objectMapById = {};
+  final Map<int, TmxObject> objects = {};
 
-  final List<TmxObject> _objectList = [];
+  late final List<TmxObject> _objects = [];
 
   @override
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "objectgroup",
       "can not parse, element is not a 'objectgroup'",
     );
-    super.readAttributes(si);
+    super.readAttributesXml(element);
 
-    color = element.getAttributeColor("color");
-    drawOrder = element.getAttributeStrOr("draworder", "topdown").toDrawOrder();
+    color = element.getAttribute<String?>("color")?.toColor();
+    drawOrder = element
+        .getAttribute<String>(
+          "draworder",
+          defaultValue: "topdown",
+        )
+        .toDrawOrder();
   }
 
   @override
-  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    switch (child.localName) {
-      case "properties":
-        properties = Properties();
-        await (properties as Properties).loadXml(si);
-        break;
+  Future<void> traverseXml() async {
+    await super.traverseXml();
+    switch (six.current.asStartElement.localName) {
       case "object":
         TmxObject object = TmxObject();
-        await object.loadXml(si);
-        _objectList.add(object);
+        await object.loadXml(six);
+        _objects.add(object);
         break;
     }
   }
 
   @override
-  void postProcess(StreamIterator<XmlAccessor> si) {
+  void postProcessXml() {
+    _postProcess();
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    await super.readJson(key);
+    switch (key) {
+      case "color":
+        color = (await this.readPropertyJsonContinue<String?>())?.toColor();
+        break;
+      case "draworder":
+        drawOrder = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "topdown",
+        ))
+            .toDrawOrder();
+        break;
+      case "objects":
+        await loadListJson(
+          l: _objects,
+          creator: TmxObject.new,
+        );
+        break;
+    }
+  }
+
+  @override
+  void loadFromJsonMap(Map<String, dynamic> json) {
+    super.loadFromJsonMap(json);
+    color = json.getField<String?>("color")?.toColor();
+    drawOrder = json.getField<DrawOrder>(
+      "draworder",
+      defaultValue: DrawOrder.topDown,
+    );
+
+    _objects.addAll(json.getField<List<TmxObject>>("objects"));
+  }
+
+  @override
+  Future<void> postProcessJson() async {
+    _postProcess();
+  }
+
+  void _postProcess() {
     if (drawOrder == DrawOrder.topDown) {
-      _objectList.sort((first, second) => first.y.compareTo(second.y));
+      _objects.sort((first, second) => first.y.compareTo(second.y));
     }
 
-    for (TmxObject object in _objectList) {
-      objectMapByName[object.name] = object;
-      objectMapById[object.id] = object;
+    for (TmxObject object in _objects) {
+      objects[object.id] = object;
     }
 
-    _objectList.clear();
+    _objects.clear();
   }
 }

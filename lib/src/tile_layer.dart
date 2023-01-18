@@ -1,117 +1,172 @@
-import 'dart:async';
+import "dart:async";
 
+import "package:xml/xml_events.dart";
 
-import 'data.dart';
-import 'flips.dart';
-import 'helpers/xml_accessor.dart';
-import 'layer.dart';
-import 'properties.dart';
+import "data.dart";
+import "enums/compression.dart";
+import "enums/encoding.dart";
+import "extensions/json_map.dart";
+import "extensions/json_traverser.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "layer.dart";
 
 class TileLayer extends Layer {
-  static const int FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
-  static const int FLIPPED_VERTICALLY_FLAG = 0x40000000;
-  static const int FLIPPED_DIAGONALLY_FLAG = 0x20000000;
-
   late int width;
   late int height;
-  late double parallaxX;
-  late double parallaxY;
+  late double parallaxX = 0.0;
+  late double parallaxY = 0.0;
+  late Encoding encoding;
+  late Compression compression = Compression.uncompressed;
 
-  Data? data;
+  final List<Data> chunks = [];
 
-  late List<List<int>> tileMatrix;
-  late List<List<Flips?>> tileFlips;
+  // Data? data;
 
   @override
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "layer",
       "can not parse, element is not a 'layer'",
     );
 
-    super.readAttributes(si);
-    width = element.getAttributeInt("width")!;
-    height = element.getAttributeInt("height")!;
-    parallaxX = element.getAttributeDoubleOr("parallaxx", 0.0);
-    parallaxY = element.getAttributeDoubleOr("parallaxy", 0.0);
+    super.readAttributesXml(element);
+    width = element.getAttribute<int>("width");
+    height = element.getAttribute<int>("height");
+    parallaxX = element.getAttribute<double>("parallaxx", defaultValue: 0.0);
+    parallaxY = element.getAttribute<double>("parallaxy", defaultValue: 0.0);
   }
 
   @override
-  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    switch (child.localName) {
+  Future<void> traverseXml() async {
+    await super.traverseXml();
+    XmlStartElementEvent element = six.current.asStartElement;
+    switch (element.localName) {
       case "data":
-        data = Data();
-        await data!.loadXml(si);
+        encoding = element.getAttribute<String>("encoding").toEncoding();
+        compression = element
+            .getAttribute<String>(
+              "compression",
+              defaultValue: "uncompressed",
+            )
+            .toCompression();
         break;
-      case "properties":
-        properties = Properties();
-        await (properties as Properties).loadXml(si);
+      case "chunk":
+        Data chunk = Data.chunked();
+        await chunk.loadXml(six);
+        chunks.add(chunk);
         break;
     }
   }
 
   @override
-  void postProcess(StreamIterator<XmlAccessor> si) {
-    if (data == null) {
-      return;
-    }
-
-    if (data!.rawData.length != width * height * 4) {
-      throw "data length should match tile size";
-    }
-
-    tileMatrix = List.generate(
+  void readTextXml(XmlTextEvent element) {
+    Data data = Data(
+      width,
       height,
-      (index) => List.generate(
-        width,
-        (_) => 0,
-        growable: false,
-      ),
-      growable: false,
     );
+    data.originalData = element.text.trim();
+    chunks.add(data);
+  }
 
-    tileFlips = List.generate(
-      height,
-      (index) => List.generate(
-        width,
-        (_) => null,
-        growable: false,
-      ),
-      growable: false,
-    );
+  @override
+  void postProcessXml() {
+    _postProcess();
+  }
 
-    int tileIndex = 0;
-    for (int y = 0; y < height; ++y) {
-      for (int x = 0; x < width; ++x) {
-        int globalTileId = data!.rawData[tileIndex] |
-            data!.rawData[tileIndex + 1] << 8 |
-            data!.rawData[tileIndex + 2] << 16 |
-            data!.rawData[tileIndex + 3] << 24;
-
-        tileIndex += 4;
-
-        final bool flippedHorizontally =
-            (globalTileId & FLIPPED_HORIZONTALLY_FLAG) ==
-                FLIPPED_HORIZONTALLY_FLAG;
-        final bool flippedVertically =
-            (globalTileId & FLIPPED_VERTICALLY_FLAG) == FLIPPED_VERTICALLY_FLAG;
-        final bool flippedDiagonally =
-            (globalTileId & FLIPPED_DIAGONALLY_FLAG) == FLIPPED_DIAGONALLY_FLAG;
-
-        globalTileId &= ~(FLIPPED_HORIZONTALLY_FLAG |
-            FLIPPED_VERTICALLY_FLAG |
-            FLIPPED_DIAGONALLY_FLAG);
-
-        tileMatrix[y][x] = globalTileId;
-
-        tileFlips[y][x] = Flips(
-          flippedHorizontally,
-          flippedVertically,
-          flippedDiagonally,
+  @override
+  Future<void> readJson(String key) async {
+    await super.readJson(key);
+    switch (key) {
+      case "width":
+        width = await this.readPropertyJsonContinue<int>();
+        break;
+      case "height":
+        height = await this.readPropertyJsonContinue<int>();
+        break;
+      case "parallaxx":
+        parallaxX =
+            await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
+        break;
+      case "parallaxy":
+        parallaxY =
+            await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
+        break;
+      case "data":
+        Data data = Data(
+          width,
+          height,
         );
-      }
+        data.originalData = await this.readPropertyJsonContinue<String>();
+        chunks.add(data);
+        break;
+      case "compression":
+        compression = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "uncompressed",
+        ))
+            .toCompression();
+        break;
+      case "encoding":
+        encoding = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "",
+        ))
+            .toEncoding();
+        break;
+      case "chunks":
+        await this.loadListJson(
+          l: chunks,
+          creator: Data.chunked,
+        );
+        break;
+    }
+  }
+
+  @override
+  void postProcessJson() {
+    _postProcess();
+  }
+
+  void _postProcess() {
+    for (Data data in chunks) {
+      data.postProcess(
+        encoding,
+        compression,
+      );
+    }
+  }
+
+  @override
+  void loadFromJsonMap(Map<String, dynamic> json) {
+    super.loadFromJsonMap(json);
+    width = json.getField<int>("width");
+    height = json.getField<int>("height");
+    parallaxX = json.getField<double>(
+      "parallaxx",
+      defaultValue: 0.0,
+    );
+    parallaxY = json.getField<double>(
+      "parallaxy",
+      defaultValue: 0.0,
+    );
+    compression = json.getField<Compression>(
+      "compression",
+      defaultValue: Compression.uncompressed,
+    );
+    encoding = json.getField<Encoding>("encoding");
+
+    String? originalData = json.getField<String?>("data");
+    if (originalData != null) {
+      Data data = Data(
+        width,
+        height,
+      );
+      data.originalData = originalData;
+      chunks.add(data);
+    }
+
+    List<Data>? _chunks = json.getField<List<Data>?>("chunks");
+    if (_chunks != null) {
+      chunks.addAll(_chunks);
     }
   }
 }

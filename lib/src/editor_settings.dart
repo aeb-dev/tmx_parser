@@ -1,17 +1,19 @@
-import 'dart:async';
+import "dart:async";
 
-import 'chunk_size.dart';
-import 'export.dart';
-import 'mixins/xml_traverser.dart';
-import 'helpers/xml_accessor.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-class EditorSettings with XmlTraverser {
-  ChunkSize? chunkSize;
+import "chunk_size.dart";
+import "export.dart";
+import "extensions/xml_event.dart";
+import "mixins/xml_traverser.dart";
+
+class EditorSettings with XmlTraverser, JsonObjectTraverser {
+  ChunkSize chunkSize = ChunkSize();
   Export? export;
 
   @override
-  void readAttributesXml(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "editorsettings",
       "can not parse, element is not a 'editorsettings'",
@@ -19,16 +21,27 @@ class EditorSettings with XmlTraverser {
   }
 
   @override
-  Future<void> traverseXml(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    switch (child.localName) {
-      case "chunkSize":
+  Future<void> traverseXml() async {
+    switch (six.current.asStartElement.localName) {
+      case "chunksize":
         chunkSize = ChunkSize();
-        await chunkSize!.loadXml(si);
+        await chunkSize.loadXml(six);
         break;
       case "export":
         export = Export();
-        await export!.loadXml(si);
+        await export!.loadXml(six);
+        break;
+    }
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "chunksize":
+        chunkSize = await this.readObjectJsonContinue(creator: ChunkSize.new);
+        break;
+      case "export":
+        export = await this.readObjectJsonContinue(creator: Export.new);
         break;
     }
   }

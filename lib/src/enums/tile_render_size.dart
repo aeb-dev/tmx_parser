@@ -1,9 +1,14 @@
 enum TileRenderSize {
-  tile,
-  grid,
+  tile("tile"),
+  grid("grid"),
+  ;
+
+  final String tiledName;
+
+  const TileRenderSize(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension TileRenderSizeExtensions on String {
   TileRenderSize toTileRenderSize() {
     switch (this) {
       case "tile":

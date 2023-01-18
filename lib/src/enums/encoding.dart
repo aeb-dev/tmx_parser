@@ -1,10 +1,14 @@
 enum Encoding {
-  csv,
-  base64,
+  csv("csv"),
+  base64("base64"),
   ;
+
+  final String tiledName;
+
+  const Encoding(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension EncodingExtensions on String {
   Encoding toEncoding() {
     switch (this) {
       case "csv":

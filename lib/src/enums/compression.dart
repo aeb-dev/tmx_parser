@@ -1,14 +1,19 @@
 enum Compression {
-  uncompressed,
-  gzip,
-  zlib,
-  zstd,
+  uncompressed("uncompressed"),
+  gzip("gzip"),
+  zlib("zlib"),
+  zstd("zstd"),
   ;
+
+  final String tiledName;
+
+  const Compression(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension CompressionExtensions on String {
   Compression toCompression() {
     switch (this) {
+      case "":
       case "uncompressed":
         return Compression.uncompressed;
       case "gzip":

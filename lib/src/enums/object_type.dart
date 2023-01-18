@@ -1,14 +1,18 @@
 enum ObjectType {
-  rectangle,
-  ellipse,
-  point,
-  polygon,
-  polyline,
-  text,
+  rectangle("rectangle"),
+  ellipse("ellipse"),
+  point("point"),
+  polygon("polygon"),
+  polyline("polyline"),
+  text("text"),
   ;
+
+  final String tiledName;
+
+  const ObjectType(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension ObjectTypeExtensions on String {
   ObjectType toObjectType() {
     switch (this) {
       case "rectangle":

@@ -4,6 +4,7 @@ class Flips {
   final bool diagonally;
 
   const Flips(
+    // ignore: avoid_positional_boolean_parameters
     this.horizontally,
     this.vertically,
     this.diagonally,
@@ -15,11 +16,10 @@ class Flips {
     bool? horizontally,
     bool? vertically,
     bool? diagonally,
-  }) {
-    return Flips(
-      horizontally ?? this.horizontally,
-      vertically ?? this.vertically,
-      diagonally ?? this.diagonally,
-    );
-  }
+  }) =>
+      Flips(
+        horizontally ?? this.horizontally,
+        vertically ?? this.vertically,
+        diagonally ?? this.diagonally,
+      );
 }

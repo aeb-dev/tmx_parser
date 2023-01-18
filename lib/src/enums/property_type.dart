@@ -1,15 +1,20 @@
 enum PropertyType {
-  string,
-  int,
-  float,
-  bool,
-  color,
-  file,
-  object,
-  classType,
+  string("string"),
+  int("int"),
+  float("float"),
+  bool("bool"),
+  color("color"),
+  file("file"),
+  object("object"),
+  $class("class"),
+  ;
+
+  final String tiledName;
+
+  const PropertyType(this.tiledName);
 }
 
-extension StringExtensions on String {
+extension PropertyTypeExtensions on String {
   PropertyType toPropertyType() {
     switch (this) {
       case "string":
@@ -27,7 +32,7 @@ extension StringExtensions on String {
       case "object":
         return PropertyType.object;
       case "class":
-        return PropertyType.classType;
+        return PropertyType.$class;
     }
 
     throw "Unknown 'PropertyType' value: '$this'";

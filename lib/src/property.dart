@@ -1,68 +1,126 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:tmx_parser/src/helpers/xml_traverser.dart';
-import 'package:xml/xml_events.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-import 'enums/property_type.dart';
-import 'helpers/xml_accessor.dart';
-import 'properties.dart';
+import "enums/property_type.dart";
+import "extensions/json_traverser.dart";
+import "extensions/string.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
 
-class Property with XmlTraverser {
+class Property with XmlTraverser, JsonObjectTraverser {
   late String name;
-  late PropertyType type;
+  late PropertyType type = PropertyType.string;
 
   dynamic value;
-  Map<String, Property>? properties;
+  final Map<String, Property> properties = {};
 
   @override
-  void readAttributes(StreamIterator<XmlAccessor> si) {
-    XmlAccessor element = si.current;
+  void readAttributesXml(XmlStartElementEvent element) {
     assert(
       element.localName == "property",
       "can not parse, element is not a 'property'",
     );
 
-    name = element.getAttributeStr("name")!;
-    type = element.getAttributeStrOr("type", "string").toPropertyType();
+    name = element.getAttribute<String>("name");
+    type = element
+        .getAttribute<String>(
+          "type",
+          defaultValue: "string",
+        )
+        .toPropertyType();
 
     switch (type) {
       case PropertyType.int:
       case PropertyType.object:
-        value = element.getAttributeIntOr("value", 0);
+        value = element.getAttribute<int>("value", defaultValue: 0);
         break;
       case PropertyType.float:
-        value = element.getAttributeDoubleOr("value", 0.0);
+        value = element.getAttribute<double>("value", defaultValue: 0.0);
         break;
       case PropertyType.bool:
-        value = element.getAttributeBoolOr("value", false);
+        value = element.getAttribute<bool>("value", defaultValue: false);
         break;
       case PropertyType.color:
-        value = element.getAttributeStrOr("value", "#00000000");
+        value = element.getAttribute<String>("value", defaultValue: "0");
         break;
       case PropertyType.string:
-        value = element.getAttributeStr("value");
+        value = element.getAttribute<String>("value", defaultValue: "");
         break;
       case PropertyType.file:
-        value = element.getAttributeStrOr("value", ".");
+        value = element.getAttribute<String>("value", defaultValue: ".");
         break;
-      case PropertyType.classType:
+      case PropertyType.$class:
         break;
     }
   }
 
   @override
-  void readText(StreamIterator<XmlAccessor> si) {
-    XmlTextEvent element = si.current.element as XmlTextEvent;
+  void readTextXml(XmlTextEvent element) {
     value ??= element.text;
   }
 
   @override
-  Future<void> traverse(StreamIterator<XmlAccessor> si) async {
-    XmlAccessor child = si.current;
-    switch (child.localName) {
+  Future<void> traverseXml() async {
+    switch (six.current.asStartElement.localName) {
+      case "property":
+        Property property = Property();
+        await property.loadXml(six);
+        properties[property.name] = property;
+        break;
+    }
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "name":
+        name = await this.readPropertyJsonContinue<String>();
+        break;
+      case "type":
+        type = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "string",
+        ))
+            .toPropertyType();
+        break;
+      case "value":
+        value = await this.readPropertyJsonContinue<dynamic>();
+        break;
       case "properties":
-        properties = Properties();
-        await (properties as Properties).loadXml(si);
+        await this.loadMapJson<String, Property>(
+          m: properties,
+          keySelector: (property) => property.name,
+          creator: Property.new,
+        );
+        break;
+    }
+  }
+
+  @override
+  Future<void> postProcessJson() async {
+    switch (type) {
+      case PropertyType.int:
+      case PropertyType.object:
+        value = (value as num?)?.toInt() ?? 0;
+        break;
+      case PropertyType.float:
+        value = (value as num?)?.toDouble() ?? 0.0;
+        break;
+      case PropertyType.bool:
+        value = value as bool? ?? false;
+        break;
+      case PropertyType.color:
+        value = (value as String?)?.toColor() ?? 0;
+        break;
+      case PropertyType.string:
+        value = value as String? ?? "";
+        break;
+      case PropertyType.file:
+        value = value as String? ?? ".";
+        break;
+      case PropertyType.$class:
         break;
     }
   }
