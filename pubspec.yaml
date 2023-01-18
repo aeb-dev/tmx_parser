@@ -1,5 +1,5 @@
 name: tmx_parser
-version: 0.2.0
+version: 0.2.1
 description: A cross platform parser for files created by Tiled Map Editor
 homepage: https://github.com/aeb-dev/tmx_parser
 repository: https://github.com/aeb-dev/tmx_parser
@@ -12,7 +12,7 @@ dependencies:
   xml: ^6.1.0
   meta: ^1.7.0
   json_events: ^1.0.1
-  collection: ^1.17.0
+  collection: ^1.16.0
 
 dev_dependencies:
   test: ^1.21.4

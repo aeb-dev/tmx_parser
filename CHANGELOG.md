@@ -1,3 +1,6 @@
+## 0.2.1
+- Hotfix for flutter dependency conflict on collection
+
 ## 0.2.0
 - Json support
 - Tmx and tmj can be read in a streaming way (chunked)
