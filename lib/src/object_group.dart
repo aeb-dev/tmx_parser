@@ -1,60 +1,106 @@
-import 'package:xml/xml.dart';
+import "dart:async";
 
-import 'extensions/xml_element.dart';
-import 'properties.dart';
-import 'property.dart';
-import 'tmx_object.dart';
+import "package:xml/xml_events.dart";
 
-class ObjectGroup {
-  late int id;
-  String name = "";
-  String color = "#a0a0a4";
-  double opacity = 1.0;
-  bool visible = true;
-  String? tintColor;
-  double offsetX = 0.0;
-  double offsetY = 0.0;
-  String drawOrder = "topdown";
+import "enums/draw_order.dart";
+import "extensions/json_map.dart";
+import "extensions/json_traverser.dart";
+import "extensions/string.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "layer.dart";
+import "tmx_object.dart";
 
-  Map<String, Property>? properties;
-  Map<String, TmxObject> objectMapByName = {};
-  Map<int, TmxObject> objectMapById = {};
+class ObjectGroup extends Layer {
+  int? color;
+  late DrawOrder drawOrder = DrawOrder.topDown;
 
-  ObjectGroup.fromXML(XmlElement element) {
-    if (element.name.local != "objectgroup") {
-      throw "can not parse, element is not a 'objectgroup'";
+  final Map<int, TmxObject> objects = {};
+
+  late final List<TmxObject> _objects = [];
+
+  @override
+  void readAttributesXml(XmlStartElementEvent element) {
+    assert(
+      element.localName == "objectgroup",
+      "can not parse, element is not a 'objectgroup'",
+    );
+    super.readAttributesXml(element);
+
+    color = element.getAttribute<String?>("color")?.toColor();
+    drawOrder = element
+        .getAttribute<String>(
+          "draworder",
+          defaultValue: "topdown",
+        )
+        .toDrawOrder();
+  }
+
+  @override
+  Future<void> traverseXml() async {
+    await super.traverseXml();
+    switch (six.current.asStartElement.localName) {
+      case "object":
+        TmxObject object = TmxObject();
+        await object.loadXml(six);
+        _objects.add(object);
+        break;
+    }
+  }
+
+  @override
+  void postProcessXml() {
+    _postProcess();
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    await super.readJson(key);
+    switch (key) {
+      case "color":
+        color = (await this.readPropertyJsonContinue<String?>())?.toColor();
+        break;
+      case "draworder":
+        drawOrder = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "topdown",
+        ))
+            .toDrawOrder();
+        break;
+      case "objects":
+        await loadListJson(
+          l: _objects,
+          creator: TmxObject.new,
+        );
+        break;
+    }
+  }
+
+  @override
+  void loadFromJsonMap(Map<String, dynamic> json) {
+    super.loadFromJsonMap(json);
+    color = json.getField<String?>("color")?.toColor();
+    drawOrder = json.getField<DrawOrder>(
+      "draworder",
+      defaultValue: DrawOrder.topDown,
+    );
+
+    _objects.addAll(json.getField<List<TmxObject>>("objects"));
+  }
+
+  @override
+  Future<void> postProcessJson() async {
+    _postProcess();
+  }
+
+  void _postProcess() {
+    if (drawOrder == DrawOrder.topDown) {
+      _objects.sort((first, second) => first.y.compareTo(second.y));
     }
 
-    id = element.getAttributeInt("id")!;
-    name = element.getAttributeStrOr("name", name);
-    color = element.getAttributeStrOr("color", color);
-    opacity = element.getAttributeDoubleOr("opacity", opacity);
-    visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStr("tintcolor");
-    offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
-    offsetY = element.getAttributeDoubleOr("offsety", offsetY);
-    drawOrder = element.getAttributeStrOr("draworder", drawOrder);
-
-    final List<TmxObject> objectList = [];
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "properties":
-          properties = Properties.fromXML(childElement);
-          break;
-        case "object":
-          final TmxObject object = TmxObject.fromXML(childElement);
-          objectList.add(object);
-          break;
-      }
-    });
-
-    if (drawOrder == "topdown") {
-      objectList.sort((first, second) => first.y.compareTo(second.y));
+    for (TmxObject object in _objects) {
+      objects[object.id] = object;
     }
 
-    objectList.forEach((object) {
-      objectMapByName[object.name] = object;
-      objectMapById[object.id] = object;
-    });
+    _objects.clear();
   }
 }

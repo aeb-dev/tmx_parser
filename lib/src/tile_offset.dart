@@ -1,19 +1,42 @@
-import 'package:xml/xml.dart';
+import "dart:async";
 
-import 'extensions/xml_element.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-class TileOffset {
-  double x = 0.0;
-  double y = 0.0;
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
 
-  TileOffset.fromXML(XmlElement element) {
-    if (element.name.local != "tileoffset") {
-      throw "can not parse, element is not a 'tileoffset'";
-    }
+class TileOffset with XmlTraverser, JsonObjectTraverser {
+  late int x = 0;
+  late int y = 0;
 
-    x = element.getAttributeDoubleOr("x", x);
-    y = element.getAttributeDoubleOr("y", y);
+  TileOffset();
+
+  TileOffset.zero() {
+    x = 0;
+    y = 0;
   }
 
-  TileOffset.zero();
+  @override
+  void readAttributesXml(XmlStartElementEvent element) {
+    assert(
+      element.localName == "tileoffset",
+      "can not parse, element is not a 'tileoffset'",
+    );
+
+    x = element.getAttribute<int>("x", defaultValue: 0);
+    y = element.getAttribute<int>("y", defaultValue: 0);
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "x":
+        x = await this.readPropertyJsonContinue<int>(defaultValue: 0);
+        break;
+      case "y":
+        y = await this.readPropertyJsonContinue<int>(defaultValue: 0);
+        break;
+    }
+  }
 }

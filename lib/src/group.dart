@@ -1,69 +1,100 @@
-import 'package:xml/xml.dart';
+import "dart:async";
 
-import 'extensions/xml_element.dart';
-import 'image_layer.dart';
-import 'layer.dart';
-import 'object_group.dart';
-import 'properties.dart';
-import 'property.dart';
+import "package:xml/xml_events.dart";
 
-class Group {
-  late int id;
-  String name = "";
-  double offsetX = 0.0;
-  double offsetY = 0.0;
-  double opacity = 1.0;
-  bool visible = true;
-  String? tintColor;
+import "extensions/xml_event.dart";
+import "image_layer.dart";
+import "layer.dart";
+import "object_group.dart";
+import "tile_layer.dart";
 
-  Map<String, Property>? properties;
-
-  final List<Layer> layers = [];
-  final Map<String, ObjectGroup> objectGroups = {};
+class Group extends Layer {
+  final List<TileLayer> tileLayers = [];
+  final List<ObjectGroup> objectGroups = [];
   final List<ImageLayer> imageLayers = [];
   final List<Group> groups = [];
 
-  final List<dynamic> renderOrderedLayers = [];
+  final List<Layer> renderOrderedLayers = [];
 
-  Group.fromXML(XmlElement element) {
-    if (element.name.local != "group") {
-      throw "can not parse, element is not a 'group'";
+  @override
+  void readAttributesXml(XmlStartElementEvent element) {
+    assert(
+      element.localName == "group",
+      "can not parse, element is not a 'group'",
+    );
+
+    super.readAttributesXml(element);
+  }
+
+  @override
+  Future<void> traverseXml() async {
+    await super.traverseXml();
+    switch (six.current.asStartElement.localName) {
+      case "layer":
+        TileLayer tileLayer = TileLayer();
+        await tileLayer.loadXml(six);
+        tileLayers.add(tileLayer);
+        renderOrderedLayers.add(tileLayer);
+        break;
+      case "objectgroup":
+        ObjectGroup objectGroup = ObjectGroup();
+        await objectGroup.loadXml(six);
+        objectGroups.add(objectGroup);
+        renderOrderedLayers.add(objectGroup);
+        break;
+      case "imagelayer":
+        ImageLayer imageLayer = ImageLayer();
+        await imageLayer.loadXml(six);
+        imageLayers.add(imageLayer);
+        renderOrderedLayers.add(imageLayer);
+        break;
+      case "group":
+        Group group = Group();
+        await group.loadXml(six);
+        groups.add(group);
+        renderOrderedLayers.add(group);
+        break;
     }
+  }
 
-    id = element.getAttributeInt("id")!;
-    name = element.getAttributeStrOr("name", name);
-    offsetX = element.getAttributeDoubleOr("offsetx", offsetX);
-    offsetY = element.getAttributeDoubleOr("offsety", offsetY);
-    opacity = element.getAttributeDoubleOr("opacity", opacity);
-    visible = element.getAttributeBoolOr("visible", visible);
-    tintColor = element.getAttributeStr("tintcolor");
+  @override
+  Future<void> readJson(String key) async {
+    await super.readJson(key);
+    switch (key) {
+      case "layers":
+        await for (Layer l in this.readArrayJsonContinue()) {
+          if (l is TileLayer) {
+            tileLayers.add(l);
+          } else if (l is Group) {
+            groups.add(l);
+          } else if (l is ObjectGroup) {
+            objectGroups.add(l);
+          } else if (l is ImageLayer) {
+            imageLayers.add(l);
+          }
 
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "properties":
-          properties = Properties.fromXML(childElement);
-          break;
-        case "layer":
-          final Layer layer = Layer.fromXML(childElement);
-          layers.add(layer);
-          renderOrderedLayers.add(layer);
-          break;
-        case "objectgroup":
-          final ObjectGroup objectGroup = ObjectGroup.fromXML(childElement);
-          objectGroups[objectGroup.name] = objectGroup;
-          renderOrderedLayers.add(objectGroup);
-          break;
-        case "imagelayer":
-          final ImageLayer imageLayer = ImageLayer.fromXML(childElement);
-          imageLayers.add(imageLayer);
-          renderOrderedLayers.add(imageLayer);
-          break;
-        case "group":
-          final Group group = Group.fromXML(childElement);
-          groups.add(group);
-          renderOrderedLayers.add(group);
-          break;
+          renderOrderedLayers.add(l);
+        }
+        break;
+    }
+  }
+
+  @override
+  void loadFromJsonMap(Map<String, dynamic> json) {
+    super.loadFromJsonMap(json);
+
+    for (Layer layer in json["layers"] as Iterable<Layer>) {
+      if (layer is TileLayer) {
+        tileLayers.add(layer);
+      } else if (layer is Group) {
+        groups.add(layer);
+      } else if (layer is ObjectGroup) {
+        objectGroups.add(layer);
+      } else if (layer is ImageLayer) {
+        imageLayers.add(layer);
       }
-    });
+
+      renderOrderedLayers.add(layer);
+    }
   }
 }

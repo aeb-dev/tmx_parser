@@ -1,39 +1,127 @@
-import 'package:xml/xml.dart';
+import "dart:async";
 
-import 'extensions/xml_element.dart';
+import "package:json_events/json_events.dart";
+import "package:xml/xml_events.dart";
 
-class Property {
+import "enums/property_type.dart";
+import "extensions/json_traverser.dart";
+import "extensions/string.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
+
+class Property with XmlTraverser, JsonObjectTraverser {
   late String name;
-  String type = "string";
-  late dynamic value;
+  late PropertyType type = PropertyType.string;
 
-  Property.fromXML(XmlElement element) {
-    if (element.name.local != "property") {
-      throw "can not parse, element is not a 'property'";
-    }
+  dynamic value;
+  final Map<String, Property> properties = {};
 
-    name = element.getAttribute("name")!;
-    type = element.getAttributeStrOr("type", type);
+  @override
+  void readAttributesXml(XmlStartElementEvent element) {
+    assert(
+      element.localName == "property",
+      "can not parse, element is not a 'property'",
+    );
+
+    name = element.getAttribute<String>("name");
+    type = element
+        .getAttribute<String>(
+          "type",
+          defaultValue: "string",
+        )
+        .toPropertyType();
 
     switch (type) {
-      case "int":
-        value = element.getAttributeIntOr("value", 0);
+      case PropertyType.int:
+      case PropertyType.object:
+        value = element.getAttribute<int>("value", defaultValue: 0);
         break;
-      case "float":
-        value = element.getAttributeDoubleOr("value", 0.0);
+      case PropertyType.float:
+        value = element.getAttribute<double>("value", defaultValue: 0.0);
         break;
-      case "bool":
-        value = element.getAttributeBoolOr("value", false);
+      case PropertyType.bool:
+        value = element.getAttribute<bool>("value", defaultValue: false);
         break;
-      case "color":
-        value = element.getAttributeStrOr("value", "#00000000");
+      case PropertyType.color:
+        value = element.getAttribute<String>("value", defaultValue: "0");
         break;
-      case "string":
-        value = element.getAttributeStrOr("value", "");
+      case PropertyType.string:
+        value = element.getAttribute<String>("value", defaultValue: "");
         break;
-      case "object": // TODO: implement object property
-      default:
-        throw "Unexpected 'type' value $type";
+      case PropertyType.file:
+        value = element.getAttribute<String>("value", defaultValue: ".");
+        break;
+      case PropertyType.$class:
+        break;
+    }
+  }
+
+  @override
+  void readTextXml(XmlTextEvent element) {
+    value ??= element.text;
+  }
+
+  @override
+  Future<void> traverseXml() async {
+    switch (six.current.asStartElement.localName) {
+      case "property":
+        Property property = Property();
+        await property.loadXml(six);
+        properties[property.name] = property;
+        break;
+    }
+  }
+
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "name":
+        name = await this.readPropertyJsonContinue<String>();
+        break;
+      case "type":
+        type = (await this.readPropertyJsonContinue<String>(
+          defaultValue: "string",
+        ))
+            .toPropertyType();
+        break;
+      case "value":
+        value = await this.readPropertyJsonContinue<dynamic>();
+        break;
+      case "properties":
+        await this.loadMapJson<String, Property>(
+          m: properties,
+          keySelector: (property) => property.name,
+          creator: Property.new,
+        );
+        break;
+    }
+  }
+
+  @override
+  Future<void> postProcessJson() async {
+    switch (type) {
+      case PropertyType.int:
+      case PropertyType.object:
+        value = (value as num?)?.toInt() ?? 0;
+        break;
+      case PropertyType.float:
+        value = (value as num?)?.toDouble() ?? 0.0;
+        break;
+      case PropertyType.bool:
+        value = value as bool? ?? false;
+        break;
+      case PropertyType.color:
+        value = (value as String?)?.toColor() ?? 0;
+        break;
+      case PropertyType.string:
+        value = value as String? ?? "";
+        break;
+      case PropertyType.file:
+        value = value as String? ?? ".";
+        break;
+      case PropertyType.$class:
+        break;
     }
   }
 }

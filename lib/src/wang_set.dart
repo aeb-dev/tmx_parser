@@ -1,48 +1,94 @@
-import 'package:xml/xml.dart';
+import "dart:async";
 
-import 'extensions/xml_element.dart';
-import 'properties.dart';
-import 'property.dart';
-import 'wang_color.dart';
-import 'wang_tile.dart';
+import "package:json_events/json_events.dart";
+import "package:meta/meta.dart";
+import "package:xml/xml_events.dart";
 
-class WangSet {
+import "extensions/json_traverser.dart";
+import "extensions/xml_event.dart";
+import "extensions/xml_start_element_event.dart";
+import "mixins/xml_traverser.dart";
+import "property.dart";
+import "wang_color.dart";
+import "wang_tile.dart";
+
+class WangSet with XmlTraverser, JsonObjectTraverser {
   late String name;
-  late int tile;
+  late String className = "";
+  late int tile = -1;
 
-  Map<String, WangCornerColor> wangCornerColors = {};
-  Map<String, WangEdgeColor> wangEdgeColors = {};
-  List<WangTile> wangTiles = [];
-  late Map<String, Property> properties;
+  final Map<String, Property> properties = {};
+  final List<WangColor> wangColors = [];
+  final Map<int, WangTile> wangTiles = {};
 
-  WangSet.fromXML(XmlElement element) {
-    if (element.name.local != "wangset") {
-      throw "can not parse, element is not a 'wangset'";
+  @override
+  @internal
+  void readAttributesXml(XmlStartElementEvent element) {
+    assert(
+      element.localName == "wangset",
+      "can not parse, element is not a 'wangset'",
+    );
+
+    name = element.getAttribute<String>("name");
+    className = element.getAttribute<String>("class", defaultValue: "");
+    tile = element.getAttribute<int>("tile", defaultValue: -1);
+  }
+
+  @override
+  @internal
+  Future<void> traverseXml() async {
+    switch (six.current.asStartElement.localName) {
+      case "wangcolor":
+        WangColor wangColor = WangColor();
+        await wangColor.loadXml(six);
+        wangColors.add(wangColor);
+        break;
+      case "wangtile":
+        WangTile wangTile = WangTile();
+        await wangTile.loadXml(six);
+        wangTiles[wangTile.tileId] = wangTile;
+        break;
+      case "property":
+        Property property = Property();
+        await property.loadXml(six);
+        properties[property.name] = property;
+        break;
     }
+  }
 
-    name = element.getAttributeStr("name")!;
-    tile = element.getAttributeInt("tile")!;
-
-    element.children.whereType<XmlElement>().forEach((childElement) {
-      switch (childElement.name.local) {
-        case "wangcornercolor":
-          final WangCornerColor wangCornerColor =
-              WangCornerColor.fromXML(childElement);
-          wangCornerColors[wangCornerColor.name] = wangCornerColor;
-          break;
-        case "wangedgecolor":
-          final WangEdgeColor wangEdgeColor =
-              WangEdgeColor.fromXML(childElement);
-          wangEdgeColors[wangEdgeColor.name] = wangEdgeColor;
-          break;
-        case "wangtile":
-          final WangTile wangTile = WangTile.fromXML(childElement);
-          wangTiles.add(wangTile);
-          break;
-        case "properties":
-          properties = Properties.fromXML(childElement);
-          break;
-      }
-    });
+  @override
+  Future<void> readJson(String key) async {
+    switch (key) {
+      case "name":
+        name = await this.readPropertyJsonContinue<String>();
+        break;
+      case "class":
+        className =
+            await this.readPropertyJsonContinue<String>(defaultValue: "");
+        break;
+      case "tile":
+        tile = await this.readPropertyJsonContinue<int>(defaultValue: -1);
+        break;
+      case "colors":
+        await this.loadListJson(
+          l: wangColors,
+          creator: WangColor.new,
+        );
+        break;
+      case "wangtiles":
+        await loadMapJson<int, WangTile>(
+          m: wangTiles,
+          keySelector: (wangTile) => wangTile.tileId,
+          creator: WangTile.new,
+        );
+        break;
+      case "properties":
+        await loadMapJson<String, Property>(
+          m: properties,
+          keySelector: (property) => property.name,
+          creator: Property.new,
+        );
+        break;
+    }
   }
 }
