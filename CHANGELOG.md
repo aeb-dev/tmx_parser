@@ -1,3 +1,6 @@
+## 0.3.0
+- Update dart version
+
 ## 0.2.1
 - Hotfix for flutter dependency conflict on collection
 
