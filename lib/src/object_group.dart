@@ -15,9 +15,9 @@ class ObjectGroup extends Layer {
   int? color;
   late DrawOrder drawOrder = DrawOrder.topDown;
 
-  final Map<int, TmxObject> objects = {};
+  final Map<int, TmxObject> objects = <int, TmxObject>{};
 
-  late final List<TmxObject> _objects = [];
+  late final List<TmxObject> _objects = <TmxObject>[];
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -44,7 +44,6 @@ class ObjectGroup extends Layer {
         TmxObject object = TmxObject();
         await object.loadXml(six);
         _objects.add(object);
-        break;
     }
   }
 
@@ -59,19 +58,16 @@ class ObjectGroup extends Layer {
     switch (key) {
       case "color":
         color = (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
       case "draworder":
         drawOrder = (await this.readPropertyJsonContinue<String>(
           defaultValue: "topdown",
         ))
             .toDrawOrder();
-        break;
       case "objects":
         await loadListJson(
           l: _objects,
           creator: TmxObject.new,
         );
-        break;
     }
   }
 
@@ -94,7 +90,8 @@ class ObjectGroup extends Layer {
 
   void _postProcess() {
     if (drawOrder == DrawOrder.topDown) {
-      _objects.sort((first, second) => first.y.compareTo(second.y));
+      _objects.sort(
+          (TmxObject first, TmxObject second) => first.y.compareTo(second.y),);
     }
 
     for (TmxObject object in _objects) {

@@ -17,6 +17,6 @@ extension DrawOrderExtensions on String {
         return DrawOrder.topDown;
     }
 
-    throw "Unknown 'DrawOrder' value: '$this'";
+    throw Exception("Unknown 'DrawOrder' value: '$this'");
   }
 }

@@ -15,7 +15,7 @@ class Property with XmlTraverser, JsonObjectTraverser {
   late PropertyType type = PropertyType.string;
 
   dynamic value;
-  final Map<String, Property> properties = {};
+  final Map<String, Property> properties = <String, Property>{};
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -36,22 +36,16 @@ class Property with XmlTraverser, JsonObjectTraverser {
       case PropertyType.int:
       case PropertyType.object:
         value = element.getAttribute<int>("value", defaultValue: 0);
-        break;
       case PropertyType.float:
         value = element.getAttribute<double>("value", defaultValue: 0.0);
-        break;
       case PropertyType.bool:
         value = element.getAttribute<bool>("value", defaultValue: false);
-        break;
       case PropertyType.color:
         value = element.getAttribute<String>("value", defaultValue: "0");
-        break;
       case PropertyType.string:
         value = element.getAttribute<String>("value", defaultValue: "");
-        break;
       case PropertyType.file:
         value = element.getAttribute<String>("value", defaultValue: ".");
-        break;
       case PropertyType.$class:
         break;
     }
@@ -59,7 +53,7 @@ class Property with XmlTraverser, JsonObjectTraverser {
 
   @override
   void readTextXml(XmlTextEvent element) {
-    value ??= element.text;
+    value ??= element.value;
   }
 
   @override
@@ -69,7 +63,6 @@ class Property with XmlTraverser, JsonObjectTraverser {
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
     }
   }
 
@@ -78,23 +71,19 @@ class Property with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "name":
         name = await this.readPropertyJsonContinue<String>();
-        break;
       case "type":
         type = (await this.readPropertyJsonContinue<String>(
           defaultValue: "string",
         ))
             .toPropertyType();
-        break;
       case "value":
         value = await this.readPropertyJsonContinue<dynamic>();
-        break;
       case "properties":
         await this.loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
     }
   }
 
@@ -104,22 +93,16 @@ class Property with XmlTraverser, JsonObjectTraverser {
       case PropertyType.int:
       case PropertyType.object:
         value = (value as num?)?.toInt() ?? 0;
-        break;
       case PropertyType.float:
         value = (value as num?)?.toDouble() ?? 0.0;
-        break;
       case PropertyType.bool:
         value = value as bool? ?? false;
-        break;
       case PropertyType.color:
         value = (value as String?)?.toColor() ?? 0;
-        break;
       case PropertyType.string:
         value = value as String? ?? "";
-        break;
       case PropertyType.file:
         value = value as String? ?? ".";
-        break;
       case PropertyType.$class:
         break;
     }

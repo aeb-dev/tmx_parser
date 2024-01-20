@@ -44,22 +44,18 @@ class Transformations with XmlTraverser, JsonObjectTraverser {
         hFlip = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
       case "vflip":
         vFlip = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
       case "rotate":
         rotate = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
       case "preferuntransformed":
         preferUntransformed = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
     }
   }
 }

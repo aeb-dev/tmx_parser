@@ -25,12 +25,12 @@ extension XmlElementExtensions on XmlStartElementEvent {
         return value.toBool() as T;
       }
 
-      throw "Unreachable";
+      throw Exception("Unreachable");
     }
 
     String? value = this
         .attributes
-        .firstWhereOrNull((attr) => attr.name == attrName)
+        .firstWhereOrNull((XmlEventAttribute attr) => attr.name == attrName)
         ?.value;
 
     if (value == null && defaultValue == null) {

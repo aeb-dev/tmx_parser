@@ -57,7 +57,7 @@ class Data with XmlTraverser, JsonObjectTraverser {
 
   @override
   void readTextXml(XmlTextEvent element) {
-    originalData = element.text.trim();
+    originalData = element.value.trim();
   }
 
   @override
@@ -65,19 +65,14 @@ class Data with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "x":
         x = await this.readPropertyJsonContinue<int>();
-        break;
       case "y":
         y = await this.readPropertyJsonContinue<int>();
-        break;
       case "width":
         width = await this.readPropertyJsonContinue<int>();
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int>();
-        break;
       case "data":
         originalData = await this.readPropertyJsonContinue<String>();
-        break;
     }
   }
 
@@ -89,11 +84,9 @@ class Data with XmlTraverser, JsonObjectTraverser {
     List<int> data;
     switch (encoding) {
       case Encoding.csv:
-        data = originalData.split(",").map((e) => int.parse(e)).toList();
-        break;
+        data = originalData.split(",").map((String e) => int.parse(e)).toList();
       case Encoding.base64:
         data = base64Decode(originalData);
-        break;
     }
 
     switch (compression) {
@@ -101,22 +94,20 @@ class Data with XmlTraverser, JsonObjectTraverser {
         break;
       case Compression.gzip:
         data = gzip.decode(data);
-        break;
       case Compression.zlib:
         data = zlib.decode(data);
-        break;
       case Compression.zstd:
-        throw "unsupported compression $compression";
+        throw Exception("Unsupported compression $compression");
     }
 
     Uint8List rawData = Uint8List.fromList(data);
     if (rawData.length != width * height * 4) {
-      throw "data length should match tile size";
+      throw Exception("Data length should match tile size");
     }
 
-    tileMatrix = List.generate(
+    tileMatrix = List<List<int>>.generate(
       height,
-      (index) => List.generate(
+      (int index) => List<int>.generate(
         width,
         (_) => 0,
         growable: false,
@@ -124,9 +115,9 @@ class Data with XmlTraverser, JsonObjectTraverser {
       growable: false,
     );
 
-    tileFlips = List.generate(
+    tileFlips = List<List<Flips?>>.generate(
       height,
-      (index) => List.generate(
+      (int index) => List<Flips?>.generate(
         width,
         (_) => null,
         growable: false,

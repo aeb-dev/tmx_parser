@@ -26,10 +26,8 @@ class Export with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "target":
         target = await this.readPropertyJsonContinue<String>();
-        break;
       case "format":
         format = await this.readPropertyJsonContinue<String>();
-        break;
     }
   }
 }

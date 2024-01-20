@@ -11,7 +11,7 @@ import "mixins/xml_traverser.dart";
 class WangTile with XmlTraverser, JsonObjectTraverser {
   late int tileId;
 
-  final List<int> wangId = [];
+  final List<int> wangId = <int>[];
 
   @override
   @internal
@@ -25,7 +25,7 @@ class WangTile with XmlTraverser, JsonObjectTraverser {
     element
         .getAttribute<String>("wangid")
         .split(",")
-        .forEach((i) => wangId.add(int.parse(i)));
+        .forEach((String i) => wangId.add(int.parse(i)));
   }
 
   @override
@@ -33,10 +33,8 @@ class WangTile with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "tileid":
         tileId = await this.readPropertyJsonContinue<int>();
-        break;
       case "wangid":
         await this.loadListJson(l: wangId);
-        break;
     }
   }
 }

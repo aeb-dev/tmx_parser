@@ -91,29 +91,29 @@ void testMap(File Function() f) {
       });
 
       group("index 0", () {
-        late Group _group;
+        late Group group_;
         setUpAll(() {
-          _group = groups[0];
+          group_ = groups[0];
         });
 
         test("", () {
-          expect(_group.id, equals(5));
-          expect(_group.name, equals("objects"));
-          expect(_group.offsetX, equals(0.0));
-          expect(_group.offsetY, equals(0.0));
-          expect(_group.opacity, equals(1.0));
-          expect(_group.tintColor, isNull);
-          expect(_group.visible, equals(true));
+          expect(group_.id, equals(5));
+          expect(group_.name, equals("objects"));
+          expect(group_.offsetX, equals(0.0));
+          expect(group_.offsetY, equals(0.0));
+          expect(group_.opacity, equals(1.0));
+          expect(group_.tintColor, isNull);
+          expect(group_.visible, equals(true));
 
-          expect(_group.groups, isEmpty);
-          expect(_group.imageLayers, isEmpty);
-          expect(_group.properties, isEmpty);
+          expect(group_.groups, isEmpty);
+          expect(group_.imageLayers, isEmpty);
+          expect(group_.properties, isEmpty);
         });
 
         group("objectGroups", () {
           late List<ObjectGroup> objectGroups;
           setUpAll(() {
-            objectGroups = _group.objectGroups;
+            objectGroups = group_.objectGroups;
           });
 
           test("", () {

@@ -39,9 +39,9 @@ class TileSet with XmlTraverser, JsonObjectTraverser {
   Grid? grid;
   Transformations? transformations;
 
-  final Map<int, Tile> tiles = {};
-  final Map<String, WangSet> wangSets = {};
-  final Map<String, Property> properties = {};
+  final Map<int, Tile> tiles = <int, Tile>{};
+  final Map<String, WangSet> wangSets = <String, WangSet>{};
+  final Map<String, Property> properties = <String, Property>{};
 
   @override
   void readAttributesXml(XmlStartElementEvent element) async {
@@ -86,34 +86,27 @@ class TileSet with XmlTraverser, JsonObjectTraverser {
       case "image":
         image = TmxImage();
         await image!.loadXml(six);
-        break;
       case "tileoffset":
         tileOffset = TileOffset();
         await tileOffset.loadXml(six);
-        break;
       case "grid":
         grid = Grid();
         await grid!.loadXml(six);
-        break;
       case "property":
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
       case "wangset":
         WangSet wangSet = WangSet();
         await wangSet.loadXml(six);
         wangSets[wangSet.name] = wangSet;
-        break;
       case "transformations":
         transformations = Transformations();
         await transformations!.loadXml(six);
-        break;
       case "tile":
         Tile tile = Tile();
         await tile.loadXml(six);
         tiles[tile.id] = tile;
-        break;
     }
   }
 
@@ -122,51 +115,38 @@ class TileSet with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "firstgid":
         firstGid = await this.readPropertyJsonContinue<int>();
-        break;
       case "source":
         source = await this.readPropertyJsonContinue<String>();
-        break;
       case "name":
         name = await this.readPropertyJsonContinue<String>();
-        break;
       case "class":
         className =
             await this.readPropertyJsonContinue<String>(defaultValue: "");
-        break;
       case "tilewidth":
         tileWidth = await this.readPropertyJsonContinue<int>();
-        break;
       case "tileheight":
         tileHeight = await this.readPropertyJsonContinue<int>();
-        break;
       case "spacing":
         spacing = await this.readPropertyJsonContinue<int>();
-        break;
       case "margin":
         margin = await this.readPropertyJsonContinue<int>();
-        break;
       case "tilecount":
         tileCount = await this.readPropertyJsonContinue<int>();
-        break;
       case "columns":
         columns = await this.readPropertyJsonContinue<int>();
-        break;
       case "objectalignment":
         objectAlignment = (await this.readPropertyJsonContinue<String?>(
           defaultValue: "unspecified",
         ))!
             .toObjectAlignment();
-        break;
       case "tilerendersize":
         tileRenderSize = (await this
                 .readPropertyJsonContinue<String?>(defaultValue: "tile"))!
             .toTileRenderSize();
-        break;
       case "fillmode":
         fillMode = (await this
                 .readPropertyJsonContinue<String?>(defaultValue: "stretch"))!
             .toFillMode();
-        break;
       // case "format":
       //   image ??= TmxImage();
       //   image!.format = await this.readPropertyJsonContinue<String?>();
@@ -174,51 +154,41 @@ class TileSet with XmlTraverser, JsonObjectTraverser {
       case "image":
         image ??= TmxImage();
         image!.source = await this.readPropertyJsonContinue<String>();
-        break;
       case "transparentcolor":
         image ??= TmxImage();
         image!.transparentColor =
             (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
       case "imagewidth":
         image ??= TmxImage();
         image!.width = await this.readPropertyJsonContinue<int?>();
-        break;
       case "imageheight":
         image ??= TmxImage();
         image!.height = await this.readPropertyJsonContinue<int?>();
-        break;
       case "tileoffset":
         tileOffset = await this.readObjectJsonContinue(creator: TileOffset.new);
-        break;
       case "grid":
         grid = await this.readObjectJsonContinue(creator: Grid.new);
-        break;
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
       case "wangsets":
         await loadMapJson<String, WangSet>(
           m: wangSets,
-          keySelector: (wangSet) => wangSet.name,
+          keySelector: (WangSet wangSet) => wangSet.name,
           creator: WangSet.new,
         );
-        break;
       case "transformations":
         transformations =
             await this.readObjectJsonContinue(creator: Transformations.new);
-        break;
       case "tiles":
         await loadMapJson<int, Tile>(
           m: tiles,
-          keySelector: (tile) => tile.id,
+          keySelector: (Tile tile) => tile.id,
           creator: Tile.new,
         );
-        break;
     }
   }
 

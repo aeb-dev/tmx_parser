@@ -23,6 +23,6 @@ extension OrientationExtensions on String {
         return Orientation.hexagonal;
     }
 
-    throw "Unknown 'Orientation' value: '$this'";
+    throw Exception("Unknown 'Orientation' value: '$this'");
   }
 }

@@ -20,6 +20,6 @@ extension VAlignExtensions on String {
         return VAlign.bottom;
     }
 
-    throw "Unknown 'VAlign' value: '$this'";
+    throw Exception("Unknown 'VAlign' value: '$this'");
   }
 }

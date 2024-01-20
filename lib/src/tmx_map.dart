@@ -44,17 +44,17 @@ class TmxMap with XmlTraverser, JsonObjectTraverser {
   late bool infinite = false;
   late EditorSettings editorSettings = EditorSettings();
 
-  final Map<String, TileSet> tileSets = {};
+  final Map<String, TileSet> tileSets = <String, TileSet>{};
 
-  final List<TileLayer> tileLayers = [];
+  final List<TileLayer> tileLayers = <TileLayer>[];
 
-  final List<ObjectGroup> objectGroups = [];
-  final List<ImageLayer> imageLayers = [];
-  final List<Group> groups = [];
+  final List<ObjectGroup> objectGroups = <ObjectGroup>[];
+  final List<ImageLayer> imageLayers = <ImageLayer>[];
+  final List<Group> groups = <Group>[];
 
-  final List<Layer> renderOrderedLayers = [];
+  final List<Layer> renderOrderedLayers = <Layer>[];
 
-  final Map<String, Property> properties = {};
+  final Map<String, Property> properties = <String, Property>{};
 
   @override
   Future<void> loadXml(StreamIterator<XmlEvent> si) async {
@@ -104,40 +104,33 @@ class TmxMap with XmlTraverser, JsonObjectTraverser {
         TileSet tileSet = TileSet();
         await tileSet.loadXml(six);
         tileSets[tileSet.name] = tileSet;
-        break;
       case "layer":
         TileLayer tileLayer = TileLayer();
         await tileLayer.loadXml(six);
         tileLayers.add(tileLayer);
         renderOrderedLayers.add(tileLayer);
-        break;
       case "objectgroup":
         ObjectGroup objectGroup = ObjectGroup();
         await objectGroup.loadXml(six);
         objectGroups.add(objectGroup);
         renderOrderedLayers.add(objectGroup);
-        break;
       case "imagelayer":
         ImageLayer imageLayer = ImageLayer();
         await imageLayer.loadXml(six);
         imageLayers.add(imageLayer);
         renderOrderedLayers.add(imageLayer);
-        break;
       case "group":
         Group group = Group();
         await group.loadXml(six);
         groups.add(group);
         renderOrderedLayers.add(group);
-        break;
       case "property":
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
       case "editorsettings":
         editorSettings = EditorSettings();
         await editorSettings.loadXml(six);
-        break;
     }
   }
 
@@ -146,78 +139,58 @@ class TmxMap with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "version":
         version = await this.readPropertyJsonContinue<String>();
-        break;
       case "tiledversion":
         tiledVersion = await this.readPropertyJsonContinue<String?>();
-        break;
       case "class":
         className = (await this.readPropertyJsonContinue<String?>()) ?? "";
-        break;
       case "orientation":
         orientation =
             (await this.readPropertyJsonContinue<String>()).toOrientation();
-        break;
       case "renderorder":
         renderOrder = (await this.readPropertyJsonContinue<String>(
           defaultValue: "right-down",
         ))
             .toRenderOrder();
-        break;
       case "compressionlevel":
         compressionLevel =
             await this.readPropertyJsonContinue<int>(defaultValue: -1);
-        break;
       case "width":
         width = await this.readPropertyJsonContinue<int>();
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int>();
-        break;
       case "tilewidth":
         tileWidth = await this.readPropertyJsonContinue<int>();
-        break;
       case "tileheight":
         tileHeight = await this.readPropertyJsonContinue<int>();
-        break;
       case "hexsidelength":
         hexSideLength = await this.readPropertyJsonContinue<int?>();
-        break;
       case "staggeraxis":
         staggerAxis =
             (await this.readPropertyJsonContinue<String?>())?.toStaggerAxis();
-        break;
       case "staggerindex":
         staggerIndex =
             (await this.readPropertyJsonContinue<String?>())?.toStaggerIndex();
-        break;
       case "parallaxoriginx":
         parallaxOriginX =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "parallaxoriginy":
         parallaxOriginY =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "nextlayerid":
         nextLayerId = await this.readPropertyJsonContinue<int>();
-        break;
       case "nextobjectid":
         nextObjectId = await this.readPropertyJsonContinue<int>();
-        break;
       case "backgroundcolor":
         backgroundColor =
             (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
       case "infinite":
         infinite = await this.readPropertyJsonContinue<bool>();
-        break;
       case "tilesets":
         await loadMapJson<String, TileSet>(
           m: tileSets,
-          keySelector: (tileSet) => tileSet.name,
+          keySelector: (TileSet tileSet) => tileSet.name,
           creator: TileSet.new,
         );
-        break;
       case "layers":
         await for (Layer layer in this.readArrayJsonContinue(
           creator: () => Layer.fromJsonMap(sij),
@@ -235,24 +208,21 @@ class TmxMap with XmlTraverser, JsonObjectTraverser {
 
           renderOrderedLayers.add(layer);
         }
-        break;
       case "editorsettings":
         editorSettings =
             await this.readObjectJsonContinue(creator: EditorSettings.new);
-        break;
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
     }
   }
 
   TileSet getTileSetByGid(int gid) {
     TileSet tileSet =
-        tileSets.values.lastWhere((tileset) => tileset.firstGid <= gid);
+        tileSets.values.lastWhere((TileSet tileset) => tileset.firstGid <= gid);
     return tileSet;
   }
 

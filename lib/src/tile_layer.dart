@@ -19,7 +19,7 @@ class TileLayer extends Layer {
   late Encoding encoding;
   late Compression compression = Compression.uncompressed;
 
-  final List<Data> chunks = [];
+  final List<Data> chunks = <Data>[];
 
   // Data? data;
 
@@ -50,12 +50,10 @@ class TileLayer extends Layer {
               defaultValue: "uncompressed",
             )
             .toCompression();
-        break;
       case "chunk":
         Data chunk = Data.chunked();
         await chunk.loadXml(six);
         chunks.add(chunk);
-        break;
     }
   }
 
@@ -64,8 +62,7 @@ class TileLayer extends Layer {
     Data data = Data(
       width,
       height,
-    );
-    data.originalData = element.text.trim();
+    )..originalData = element.value.trim();
     chunks.add(data);
   }
 
@@ -80,18 +77,14 @@ class TileLayer extends Layer {
     switch (key) {
       case "width":
         width = await this.readPropertyJsonContinue<int>();
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int>();
-        break;
       case "parallaxx":
         parallaxX =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "parallaxy":
         parallaxY =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "data":
         Data data = Data(
           width,
@@ -99,25 +92,21 @@ class TileLayer extends Layer {
         );
         data.originalData = await this.readPropertyJsonContinue<String>();
         chunks.add(data);
-        break;
       case "compression":
         compression = (await this.readPropertyJsonContinue<String>(
           defaultValue: "uncompressed",
         ))
             .toCompression();
-        break;
       case "encoding":
         encoding = (await this.readPropertyJsonContinue<String>(
           defaultValue: "",
         ))
             .toEncoding();
-        break;
       case "chunks":
         await this.loadListJson(
           l: chunks,
           creator: Data.chunked,
         );
-        break;
     }
   }
 
@@ -159,14 +148,13 @@ class TileLayer extends Layer {
       Data data = Data(
         width,
         height,
-      );
-      data.originalData = originalData;
+      )..originalData = originalData;
       chunks.add(data);
     }
 
-    List<Data>? _chunks = json.getField<List<Data>?>("chunks");
-    if (_chunks != null) {
-      chunks.addAll(_chunks);
+    List<Data>? chunks_ = json.getField<List<Data>?>("chunks");
+    if (chunks_ != null) {
+      chunks.addAll(chunks_);
     }
   }
 }

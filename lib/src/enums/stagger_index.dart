@@ -17,6 +17,6 @@ extension StaggerIndexExtensions on String {
         return StaggerIndex.odd;
     }
 
-    throw "Unknown 'StaggerIndex' value: '$this'";
+    throw Exception("Unknown 'StaggerIndex' value: '$this'");
   }
 }

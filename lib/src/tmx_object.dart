@@ -28,8 +28,8 @@ class TmxObject with XmlTraverser, JsonObjectTraverser {
   ObjectType? objectType;
   Text? text;
 
-  final List<Point> points = [];
-  final Map<String, Property> properties = {};
+  final List<Point> points = <Point>[];
+  final Map<String, Property> properties = <String, Property>{};
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -55,17 +55,15 @@ class TmxObject with XmlTraverser, JsonObjectTraverser {
     switch (six.current.asStartElement.localName) {
       case "ellipse":
         objectType = ObjectType.ellipse;
-        break;
       case "point":
         objectType = ObjectType.point;
-        break;
       case "polygon":
       case "polyline":
         objectType = six.current.asStartElement.localName.toObjectType();
         six.current.asStartElement
             .getAttribute<String>("points")
             .split(" ")
-            .forEach((pointS) {
+            .forEach((String pointS) {
           List<String> pointPairs = pointS.split(",");
           Point p = Point.from(
             double.parse(pointPairs.first),
@@ -74,17 +72,14 @@ class TmxObject with XmlTraverser, JsonObjectTraverser {
 
           points.add(p);
         });
-        break;
       case "text":
         objectType = ObjectType.text;
         text = Text();
         await text!.loadXml(six);
-        break;
       case "property":
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
     }
   }
 
@@ -98,42 +93,30 @@ class TmxObject with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "id":
         id = await this.readPropertyJsonContinue<int>();
-        break;
       case "name":
         name = await this.readPropertyJsonContinue<String>(defaultValue: "");
-        break;
       case "class":
         className =
             await this.readPropertyJsonContinue<String>(defaultValue: "");
-        break;
       case "x":
         x = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "y":
         y = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "width":
         width = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "rotation":
         rotation =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "gid":
         gid = await this.readPropertyJsonContinue<int?>();
-        break;
       case "visible":
         visible = await this.readPropertyJsonContinue<bool>(defaultValue: true);
-        break;
       case "ellipse":
         objectType = ObjectType.ellipse;
-        break;
       case "point":
         objectType = ObjectType.point;
-        break;
       case "polygon":
       case "polyline":
         objectType = key.toObjectType();
@@ -141,18 +124,15 @@ class TmxObject with XmlTraverser, JsonObjectTraverser {
           l: points,
           creator: Point.zero,
         );
-        break;
       case "text":
         objectType = ObjectType.text;
         text = await this.readObjectJsonContinue(creator: Text.new);
-        break;
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
     }
   }
 

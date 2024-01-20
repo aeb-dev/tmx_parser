@@ -16,10 +16,8 @@ class Point with JsonObjectTraverser {
     switch (key) {
       case "x":
         x = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "y":
         y = await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
     }
   }
 }

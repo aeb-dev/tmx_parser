@@ -9,12 +9,12 @@ import "object_group.dart";
 import "tile_layer.dart";
 
 class Group extends Layer {
-  final List<TileLayer> tileLayers = [];
-  final List<ObjectGroup> objectGroups = [];
-  final List<ImageLayer> imageLayers = [];
-  final List<Group> groups = [];
+  final List<TileLayer> tileLayers = <TileLayer>[];
+  final List<ObjectGroup> objectGroups = <ObjectGroup>[];
+  final List<ImageLayer> imageLayers = <ImageLayer>[];
+  final List<Group> groups = <Group>[];
 
-  final List<Layer> renderOrderedLayers = [];
+  final List<Layer> renderOrderedLayers = <Layer>[];
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -35,25 +35,21 @@ class Group extends Layer {
         await tileLayer.loadXml(six);
         tileLayers.add(tileLayer);
         renderOrderedLayers.add(tileLayer);
-        break;
       case "objectgroup":
         ObjectGroup objectGroup = ObjectGroup();
         await objectGroup.loadXml(six);
         objectGroups.add(objectGroup);
         renderOrderedLayers.add(objectGroup);
-        break;
       case "imagelayer":
         ImageLayer imageLayer = ImageLayer();
         await imageLayer.loadXml(six);
         imageLayers.add(imageLayer);
         renderOrderedLayers.add(imageLayer);
-        break;
       case "group":
         Group group = Group();
         await group.loadXml(six);
         groups.add(group);
         renderOrderedLayers.add(group);
-        break;
     }
   }
 
@@ -75,7 +71,6 @@ class Group extends Layer {
 
           renderOrderedLayers.add(l);
         }
-        break;
     }
   }
 

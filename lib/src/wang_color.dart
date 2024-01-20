@@ -17,7 +17,7 @@ class WangColor with XmlTraverser, JsonObjectTraverser {
   late int tile = -1;
   late double probability = 0.0;
 
-  final Map<String, Property> properties = {};
+  final Map<String, Property> properties = <String, Property>{};
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -41,7 +41,6 @@ class WangColor with XmlTraverser, JsonObjectTraverser {
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
     }
   }
 
@@ -50,27 +49,21 @@ class WangColor with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "name":
         name = await this.readPropertyJsonContinue<String>();
-        break;
       case "class":
         className = await this.readPropertyJsonContinue(defaultValue: "");
-        break;
       case "color":
         color = (await this.readPropertyJsonContinue<String>()).toColor();
-        break;
       case "tile":
         tile = await this.readPropertyJsonContinue<int>(defaultValue: -1);
-        break;
       case "probability":
         probability =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
     }
   }
 }

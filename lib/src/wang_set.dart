@@ -17,9 +17,9 @@ class WangSet with XmlTraverser, JsonObjectTraverser {
   late String className = "";
   late int tile = -1;
 
-  final Map<String, Property> properties = {};
-  final List<WangColor> wangColors = [];
-  final Map<int, WangTile> wangTiles = {};
+  final Map<String, Property> properties = <String, Property>{};
+  final List<WangColor> wangColors = <WangColor>[];
+  final Map<int, WangTile> wangTiles = <int, WangTile>{};
 
   @override
   @internal
@@ -42,17 +42,14 @@ class WangSet with XmlTraverser, JsonObjectTraverser {
         WangColor wangColor = WangColor();
         await wangColor.loadXml(six);
         wangColors.add(wangColor);
-        break;
       case "wangtile":
         WangTile wangTile = WangTile();
         await wangTile.loadXml(six);
         wangTiles[wangTile.tileId] = wangTile;
-        break;
       case "property":
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
     }
   }
 
@@ -61,34 +58,28 @@ class WangSet with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "name":
         name = await this.readPropertyJsonContinue<String>();
-        break;
       case "class":
         className =
             await this.readPropertyJsonContinue<String>(defaultValue: "");
-        break;
       case "tile":
         tile = await this.readPropertyJsonContinue<int>(defaultValue: -1);
-        break;
       case "colors":
         await this.loadListJson(
           l: wangColors,
           creator: WangColor.new,
         );
-        break;
       case "wangtiles":
         await loadMapJson<int, WangTile>(
           m: wangTiles,
-          keySelector: (wangTile) => wangTile.tileId,
+          keySelector: (WangTile wangTile) => wangTile.tileId,
           creator: WangTile.new,
         );
-        break;
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
     }
   }
 }

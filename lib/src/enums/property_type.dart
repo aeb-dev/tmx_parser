@@ -35,6 +35,6 @@ extension PropertyTypeExtensions on String {
         return PropertyType.$class;
     }
 
-    throw "Unknown 'PropertyType' value: '$this'";
+    throw Exception("Unknown 'PropertyType' value: '$this'");
   }
 }

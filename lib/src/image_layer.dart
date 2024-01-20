@@ -38,7 +38,6 @@ class ImageLayer extends Layer {
       case "image":
         image = TmxImage();
         await image!.loadXml(six);
-        break;
     }
   }
 
@@ -50,16 +49,13 @@ class ImageLayer extends Layer {
         repeatX = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
       case "repeaty":
         repeatY = await this.readPropertyJsonContinue<bool>(
           defaultValue: false,
         );
-        break;
       case "image":
         image ??= TmxImage();
         image!.source = await this.readPropertyJsonContinue<String>();
-        break;
     }
   }
 

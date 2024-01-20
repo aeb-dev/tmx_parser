@@ -34,12 +34,10 @@ class ChunkSize with XmlTraverser, JsonObjectTraverser {
         width = await this.readPropertyJsonContinue<int>(
           defaultValue: 16,
         );
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int>(
           defaultValue: 16,
         );
-        break;
     }
   }
 }

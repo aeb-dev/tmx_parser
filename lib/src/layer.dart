@@ -29,7 +29,7 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
   late double opacity = 1.0;
   int? tintColor;
 
-  final Map<String, Property> properties = {};
+  final Map<String, Property> properties = <String, Property>{};
 
   static FutureOr<Layer> fromJsonMap(StreamIterator<JsonEvent> si) async {
     late Map<String, dynamic> json;
@@ -45,7 +45,6 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
           )) {
             layers.add(layer);
           }
-          break;
         case "objects":
           List<TmxObject> objects = json[key] as List<TmxObject>;
           await for (TmxObject object in readArrayJsonContinue(
@@ -54,7 +53,6 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
           )) {
             objects.add(object);
           }
-          break;
         case "chunks":
           List<Data> datas = json[key] as List<Data>;
           await for (Data data in readArrayJsonContinue(
@@ -63,7 +61,6 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
           )) {
             datas.add(data);
           }
-          break;
         case "properties":
           Map<String, Property> properties = json[key] as Map<String, Property>;
 
@@ -73,120 +70,99 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
           )) {
             properties[property.name] = property;
           }
-          break;
         case "type":
           json[key] = await readPropertyJsonContinue<String>(si: si);
-          break;
         case "id":
           json[key] = await readPropertyJsonContinue<int>(si: si);
-          break;
         case "name":
           json[key] = await readPropertyJsonContinue<String>(
             si: si,
             defaultValue: "",
           );
-          break;
         case "visible":
           json[key] = await readPropertyJsonContinue<bool>(
             si: si,
             defaultValue: true,
           );
-          break;
         case "offsetx":
           json[key] = await readPropertyJsonContinue<double>(
             si: si,
             defaultValue: 0.0,
           );
-          break;
         case "offsety":
           json[key] = await readPropertyJsonContinue<double>(
             si: si,
             defaultValue: 0.0,
           );
-          break;
         case "opacity":
           json[key] = await readPropertyJsonContinue<double>(
             si: si,
             defaultValue: 1.0,
           );
-          break;
         case "tintcolor":
           json[key] = (await readPropertyJsonContinue<String?>(
             si: si,
           ))
               ?.toColor();
-          break;
         case "color":
           json[key] = (await readPropertyJsonContinue<String?>(
             si: si,
           ))
               ?.toColor();
-          break;
         case "draworder":
           json[key] = (await readPropertyJsonContinue<String>(
             si: si,
             defaultValue: "topdown",
           ))
               .toDrawOrder();
-          break;
         case "repeatx":
           json[key] = await readPropertyJsonContinue<bool>(
             si: si,
             defaultValue: false,
           );
-          break;
         case "repeaty":
           json[key] = await readPropertyJsonContinue<bool>(
             si: si,
             defaultValue: false,
           );
-          break;
         case "image":
           json[key] = await readPropertyJsonContinue<String>(
             si: si,
           );
-          break;
         case "width":
           json[key] = await readPropertyJsonContinue<int>(
             si: si,
           );
-          break;
         case "height":
           json[key] = await readPropertyJsonContinue<int>(
             si: si,
           );
-          break;
         case "parallaxx":
           json[key] = await readPropertyJsonContinue<double>(
             si: si,
             defaultValue: 0.0,
           );
-          break;
         case "parallaxy":
           json[key] = await readPropertyJsonContinue<double>(
             si: si,
             defaultValue: 0.0,
           );
-          break;
         case "data":
           json[key] = await readPropertyJsonContinue<String>(
             si: si,
           );
-          break;
         case "compression":
           json[key] = (await readPropertyJsonContinue<String>(
             si: si,
             defaultValue: "uncompressed",
           ))
               .toCompression();
-          break;
         case "encoding":
           json[key] = (await readPropertyJsonContinue<String>(
             si: si,
             defaultValue: "",
           ))
               .toEncoding();
-          break;
       }
     }
 
@@ -203,16 +179,12 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
     switch (json["type"] as String) {
       case "tilelayer":
         layer = TileLayer();
-        break;
       case "group":
         layer = Group();
-        break;
       case "objectgroup":
         layer = ObjectGroup();
-        break;
       case "imagelayer":
         layer = ImageLayer();
-        break;
     }
 
     layer.loadFromJsonMap(json);
@@ -256,7 +228,6 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
     }
   }
 
@@ -265,35 +236,28 @@ abstract class Layer with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "id":
         id = await this.readPropertyJsonContinue<int>();
-        break;
       case "name":
         name = await this.readPropertyJsonContinue<String>(
           defaultValue: "",
         );
-        break;
       case "visible":
         visible = await this.readPropertyJsonContinue<bool>(
           defaultValue: true,
         );
-        break;
       case "offsetx":
         offsetX = await this.readPropertyJsonContinue<double>(
           defaultValue: 0.0,
         );
-        break;
       case "offsety":
         offsetY = await this.readPropertyJsonContinue<double>(
           defaultValue: 0.0,
         );
-        break;
       case "opacity":
         opacity = await this.readPropertyJsonContinue<double>(
           defaultValue: 1.0,
         );
-        break;
       case "tintcolor":
         tintColor = (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
     }
   }
 

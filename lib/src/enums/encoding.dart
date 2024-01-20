@@ -17,6 +17,6 @@ extension EncodingExtensions on String {
         return Encoding.base64;
     }
 
-    throw "Unknown 'Encoding' value: '$this'";
+    throw Exception("Unknown 'Encoding' value: '$this'");
   }
 }

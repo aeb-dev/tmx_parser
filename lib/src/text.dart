@@ -48,7 +48,7 @@ class Text with XmlTraverser, JsonObjectTraverser {
 
   @override
   void readTextXml(XmlTextEvent element) {
-    content = element.text;
+    content = element.value;
   }
 
   @override
@@ -57,41 +57,31 @@ class Text with XmlTraverser, JsonObjectTraverser {
       case "fontFamily":
         fontFamily = await this
             .readPropertyJsonContinue<String>(defaultValue: "sans-serif");
-        break;
       case "pixelSize":
         pixelSize =
             await this.readPropertyJsonContinue<double>(defaultValue: 16.0);
-        break;
       case "wrap":
         wrap = await this.readPropertyJsonContinue<bool>(defaultValue: false);
-        break;
       case "color":
         color = (await this
                 .readPropertyJsonContinue<String>(defaultValue: "0xff000000"))
             .toColor();
-        break;
       case "bold":
         bold = await this.readPropertyJsonContinue<bool>(defaultValue: false);
-        break;
       case "italic":
         italic = await this.readPropertyJsonContinue<bool>(defaultValue: false);
-        break;
       case "underline":
         underline =
             await this.readPropertyJsonContinue<bool>(defaultValue: false);
-        break;
       case "kerning":
         kerning =
             await this.readPropertyJsonContinue<bool>(defaultValue: false);
-        break;
       case "hAlign":
         (await this.readPropertyJsonContinue<String>(defaultValue: "left"))
             .toHAlign();
-        break;
       case "vAlign":
         (await this.readPropertyJsonContinue<String>(defaultValue: "top"))
             .toVAlign();
-        break;
     }
   }
 }

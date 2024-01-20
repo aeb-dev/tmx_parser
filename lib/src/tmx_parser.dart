@@ -24,26 +24,26 @@ class TmxParser {
       return TmxParser.fromJsonStringStream(stream);
     }
 
-    throw "Unknown file extension: '$extension'";
+    throw Exception("Unknown file extension: '$extension'");
   }
 
   static Future<TmxMap> fromXmlStream(Stream<XmlEvent> stream) async {
-    StreamIterator<XmlEvent> si = StreamIterator(stream);
+    StreamIterator<XmlEvent> si = StreamIterator<XmlEvent>(stream);
     TmxMap map = TmxMap();
     await map.loadXml(si);
     return map;
   }
 
   static Future<TmxMap> fromXmlString(String xml) =>
-      TmxParser._fromXmlStringStream(Stream.value(xml));
+      TmxParser._fromXmlStringStream(Stream<String>.value(xml));
 
   static Future<TmxMap> _fromXmlStringStream(Stream<String> stream) {
     Stream<XmlEvent> eventStream =
         stream.toXmlEvents().normalizeEvents().flatten().where(
-              (event) =>
+              (XmlEvent event) =>
                   event is XmlStartElementEvent ||
                   event is XmlEndElementEvent ||
-                  (event is XmlTextEvent && event.text.trim().isNotEmpty),
+                  (event is XmlTextEvent && event.value.trim().isNotEmpty),
             );
 
     return TmxParser.fromXmlStream(eventStream);

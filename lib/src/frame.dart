@@ -26,10 +26,8 @@ class Frame with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "tileid":
         tileId = await this.readPropertyJsonContinue<int>();
-        break;
       case "duration":
         duration = await this.readPropertyJsonContinue<int>();
-        break;
     }
   }
 }

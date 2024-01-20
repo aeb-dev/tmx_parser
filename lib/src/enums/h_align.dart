@@ -23,6 +23,6 @@ extension HAlignExtensions on String {
         return HAlign.justify;
     }
 
-    throw "Unknown 'HAlign' value: '$this'";
+    throw Exception("Unknown 'HAlign' value: '$this'");
   }
 }

@@ -36,13 +36,10 @@ class Grid with XmlTraverser, JsonObjectTraverser {
         orientation = (await this
                 .readPropertyJsonContinue<String>(defaultValue: "orthogonal"))
             .toOrientation();
-        break;
       case "width":
         width = await this.readPropertyJsonContinue<int>();
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int>();
-        break;
     }
   }
 }

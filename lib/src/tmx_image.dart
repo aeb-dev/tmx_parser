@@ -48,17 +48,13 @@ class TmxImage with XmlTraverser, JsonObjectTraverser {
       //   break;
       case "source":
         source = await this.readPropertyJsonContinue<String>();
-        break;
       case "transparentcolor":
         transparentColor =
             (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
       case "width":
         width = await this.readPropertyJsonContinue<int?>();
-        break;
       case "height":
         height = await this.readPropertyJsonContinue<int?>();
-        break;
       // case "data":
       //   break;
     }

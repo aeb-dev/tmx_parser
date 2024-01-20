@@ -25,8 +25,8 @@ class Tile with XmlTraverser, JsonObjectTraverser {
   TmxImage? image;
   ObjectGroup? objectGroup;
 
-  final Map<String, Property> properties = {};
-  final List<Frame> animation = [];
+  final Map<String, Property> properties = <String, Property>{};
+  final List<Frame> animation = <Frame>[];
 
   @override
   void readAttributesXml(XmlStartElementEvent element) {
@@ -52,20 +52,16 @@ class Tile with XmlTraverser, JsonObjectTraverser {
         Property property = Property();
         await property.loadXml(six);
         properties[property.name] = property;
-        break;
       case "image":
         image = TmxImage();
         await image!.loadXml(six);
-        break;
       case "objectgroup":
         objectGroup = ObjectGroup();
         await objectGroup!.loadXml(six);
-        break;
       case "frame":
         Frame frame = Frame();
         await frame.loadXml(six);
         animation.add(frame);
-        break;
     }
   }
 
@@ -74,15 +70,12 @@ class Tile with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "id":
         id = await this.readPropertyJsonContinue<int>();
-        break;
       case "class":
         className =
             await this.readPropertyJsonContinue<String>(defaultValue: "");
-        break;
       case "probability":
         probability =
             await this.readPropertyJsonContinue<double>(defaultValue: 0.0);
-        break;
       // case "x":
       //   x = await this.readPropertyJsonContinue<int>(defaultValue: 0);
       //   break;
@@ -92,10 +85,9 @@ class Tile with XmlTraverser, JsonObjectTraverser {
       case "properties":
         await loadMapJson<String, Property>(
           m: properties,
-          keySelector: (property) => property.name,
+          keySelector: (Property property) => property.name,
           creator: Property.new,
         );
-        break;
       // case "format":
       //   image ??= TmxImage();
       //   image!.format = await this.readPropertyJsonContinue<String?>();
@@ -103,30 +95,24 @@ class Tile with XmlTraverser, JsonObjectTraverser {
       case "image":
         image ??= TmxImage();
         image!.source = await this.readPropertyJsonContinue<String>();
-        break;
       case "transparentcolor":
         image ??= TmxImage();
         image!.transparentColor =
             (await this.readPropertyJsonContinue<String?>())?.toColor();
-        break;
       case "imagewidth":
         image ??= TmxImage();
         image!.width = await this.readPropertyJsonContinue<int?>();
-        break;
       case "imageheight":
         image ??= TmxImage();
         image!.height = await this.readPropertyJsonContinue<int?>();
-        break;
       case "objectgroup":
         objectGroup =
             await this.readObjectJsonContinue(creator: ObjectGroup.new);
-        break;
       case "animation":
         await loadListJson(
           l: animation,
           creator: Frame.new,
         );
-        break;
     }
   }
 }

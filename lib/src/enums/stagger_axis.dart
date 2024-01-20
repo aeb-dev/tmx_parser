@@ -17,6 +17,6 @@ extension StaggerAxisExtensions on String {
         return StaggerAxis.y;
     }
 
-    throw "Unknown 'StaggerAxis' value: '$this'";
+    throw Exception("Unknown 'StaggerAxis' value: '$this'");
   }
 }

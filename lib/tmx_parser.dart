@@ -1,5 +1,3 @@
-library tmx_parser;
-
 export "src/chunk_size.dart";
 export "src/data.dart";
 export "src/editor_settings.dart";

@@ -23,6 +23,6 @@ extension RenderOrderExtensions on String {
         return RenderOrder.leftUp;
     }
 
-    throw "Unknown 'RenderOrder' value: '$this'";
+    throw Exception("Unknown 'RenderOrder' value: '$this'");
   }
 }

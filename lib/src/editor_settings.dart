@@ -26,11 +26,9 @@ class EditorSettings with XmlTraverser, JsonObjectTraverser {
       case "chunksize":
         chunkSize = ChunkSize();
         await chunkSize.loadXml(six);
-        break;
       case "export":
         export = Export();
         await export!.loadXml(six);
-        break;
     }
   }
 
@@ -39,10 +37,8 @@ class EditorSettings with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "chunksize":
         chunkSize = await this.readObjectJsonContinue(creator: ChunkSize.new);
-        break;
       case "export":
         export = await this.readObjectJsonContinue(creator: Export.new);
-        break;
     }
   }
 }

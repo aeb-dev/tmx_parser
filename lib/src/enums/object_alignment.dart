@@ -39,6 +39,6 @@ extension ObjectAlignmentExtensions on String {
         return ObjectAlignment.right;
     }
 
-    throw "Unknown 'ObjectAlignment' value: '$this'";
+    throw Exception("Unknown 'ObjectAlignment' value: '$this'");
   }
 }

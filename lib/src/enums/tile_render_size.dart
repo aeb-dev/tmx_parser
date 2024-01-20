@@ -17,6 +17,6 @@ extension TileRenderSizeExtensions on String {
         return TileRenderSize.grid;
     }
 
-    throw "Unknown 'TileRenderSize' value: '$this'";
+    throw Exception("Unknown 'TileRenderSize' value: '$this'");
   }
 }

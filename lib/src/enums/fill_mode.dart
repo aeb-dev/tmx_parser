@@ -17,6 +17,6 @@ extension FillModeExtensions on String {
         return FillMode.preserveAspectFit;
     }
 
-    throw "Unknown 'FillMode' value: '$this'";
+    throw Exception("Unknown 'FillMode' value: '$this'");
   }
 }

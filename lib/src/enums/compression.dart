@@ -24,6 +24,6 @@ extension CompressionExtensions on String {
         return Compression.zstd;
     }
 
-    throw "Unknown 'Compression' value: '$this'";
+    throw Exception("Unknown 'Compression' value: '$this'");
   }
 }

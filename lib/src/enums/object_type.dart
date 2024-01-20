@@ -29,6 +29,6 @@ extension ObjectTypeExtensions on String {
         return ObjectType.text;
     }
 
-    throw "Unknown 'ObjectType' value: '$this'";
+    throw Exception("Unknown 'ObjectType' value: '$this'");
   }
 }

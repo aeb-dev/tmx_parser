@@ -13,7 +13,10 @@ mixin XmlTraverser {
   FutureOr<void> loadXml(StreamIterator<XmlEvent> si) async {
     six = si;
 
-    assert(si.current is XmlStartElementEvent);
+    assert(
+      si.current is XmlStartElementEvent,
+      "Current event should XmlStartElementEvent",
+    );
 
     String localName = si.current.asStartElement.localName;
 

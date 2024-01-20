@@ -33,10 +33,8 @@ class TileOffset with XmlTraverser, JsonObjectTraverser {
     switch (key) {
       case "x":
         x = await this.readPropertyJsonContinue<int>(defaultValue: 0);
-        break;
       case "y":
         y = await this.readPropertyJsonContinue<int>(defaultValue: 0);
-        break;
     }
   }
 }
