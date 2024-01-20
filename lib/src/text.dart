@@ -34,7 +34,7 @@ class Text with XmlTraverser, JsonObjectTraverser {
     pixelSize = element.getAttribute<double>("pixelsize", defaultValue: 16.0);
     wrap = element.getAttribute<bool>("wrap", defaultValue: false);
     color = element
-        .getAttribute<String>("color", defaultValue: "0xff000000")
+        .getAttribute<String>("color", defaultValue: "ff000000")
         .toColor();
     bold = element.getAttribute<bool>("bold", defaultValue: false);
     italic = element.getAttribute<bool>("italic", defaultValue: false);
