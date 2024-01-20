@@ -1,3 +1,7 @@
+## 0.3.1
+- Fix for text color
+- Fix lints
+
 ## 0.3.0
 - Update dart version
 
